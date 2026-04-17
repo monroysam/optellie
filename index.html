@@ -16,13 +16,6 @@
     --bg-soft: #0B0D0C;
     --text: #F5F1EA;
     --gold: #C9A770;
-    --nav-left: 48px;
-    --nav-top: 24px;
-    --nav-font: 20px;
-    --nav-spacing: 0.22em;
-    --nav-icon: 18px;
-    --nav-gap: 10px;
-    --line-gap: 40px;
   }
 
   body {
@@ -64,7 +57,7 @@
     display: inline-block;
     background: transparent;
     color: var(--text);
-    border: 1px solid rgba(245,241,234,0.3);
+    border: 1px solid rgba(245,241,234,0.28);
     padding: 10px 22px;
     font-size: 11px;
     letter-spacing: 0.18em;
@@ -73,7 +66,7 @@
     cursor: pointer;
     text-decoration: none;
     font-family: inherit;
-    transition: border-color 0.3s, color 0.3s;
+    transition: border-color 0.3s, color 0.3s, background 0.3s;
   }
 
   .nav-cta:hover {
@@ -93,7 +86,8 @@
   }
 
   .hero-bg {
-    position: absolute; inset: 0;
+    position: absolute;
+    inset: 0;
     background:
       radial-gradient(ellipse 60% 50% at 78% 35%, #8C6A2E 0%, #5A4217 35%, #2A1F0C 70%, transparent 100%),
       radial-gradient(ellipse 55% 70% at 20% 60%, #6E7A7D 0%, #3E4749 40%, #1A1F20 75%, transparent 100%),
@@ -103,7 +97,8 @@
   }
 
   .hero-vignette {
-    position: absolute; inset: 0;
+    position: absolute;
+    inset: 0;
     background: radial-gradient(ellipse at center, transparent 28%, rgba(0,0,0,0.68) 100%);
   }
 
@@ -258,8 +253,8 @@
   }
 
   @keyframes floathint {
-    0%,100% { transform: translate(-50%,0); opacity:0.4; }
-    50% { transform: translate(-50%,8px); opacity:0.8; }
+    0%,100% { transform: translate(-50%,0); opacity: 0.4; }
+    50%     { transform: translate(-50%,8px); opacity: 0.8; }
   }
 
   .pillars {
@@ -512,26 +507,16 @@
     color: rgba(245,241,234,0.42);
   }
 
-  /* Mobile */
   @media (max-width: 768px) {
-    :root {
-      --nav-left: 20px;
-      --nav-top: 18px;
-      --nav-font: 15px;
-      --nav-spacing: 0.16em;
-      --nav-icon: 14px;
-      --nav-gap: 8px;
-      --line-gap: 24px;
-    }
-
     nav {
-      padding: 18px 20px;
+      padding: 16px 18px;
+      justify-content: flex-end;
     }
 
     .nav-cta {
-      padding: 9px 14px;
+      padding: 9px 13px;
       font-size: 10px;
-      letter-spacing: 0.14em;
+      letter-spacing: 0.12em;
     }
 
     .hero {
@@ -545,30 +530,29 @@
     }
 
     #hero-anchor {
-      font-size: clamp(30px, 11vw, 54px);
+      font-size: clamp(28px, 11vw, 50px);
       letter-spacing: 0.08em;
       margin-bottom: 14px;
       max-width: calc(100vw - 40px);
     }
 
     .brand-rule {
-      width: min(320px, 88vw);
+      width: min(300px, 86vw);
       margin-bottom: 10px;
     }
 
     .brand-tagline {
       font-size: 10px;
       letter-spacing: 0.22em;
-      margin-bottom: 34px;
-      padding: 0 8px;
+      margin-bottom: 32px;
+      padding: 0 6px;
     }
 
     .hero p {
       font-size: 15px;
       line-height: 1.65;
       max-width: 100%;
-      margin-bottom: 30px;
-      padding: 0 2px;
+      margin-bottom: 28px;
     }
 
     .hero-actions {
@@ -580,14 +564,15 @@
       padding: 14px 22px;
       font-size: 11px;
       letter-spacing: 0.14em;
-      width: auto;
-      max-width: 100%;
     }
 
     .wip-inline {
       gap: 8px;
-      max-width: 100%;
       text-align: center;
+    }
+
+    .wip-sep {
+      display: none;
     }
 
     .wip-label,
@@ -596,18 +581,14 @@
       letter-spacing: 0.12em;
     }
 
-    .wip-sep {
-      display: none;
-    }
-
     .scroll-hint {
-      bottom: 24px;
+      bottom: 22px;
       font-size: 10px;
       letter-spacing: 0.18em;
     }
 
     .pillars {
-      padding: 88px 20px 110px;
+      padding: 92px 20px 110px;
     }
 
     .pillars-inner {
@@ -615,15 +596,16 @@
     }
 
     #approach-anchor {
-      font-size: clamp(32px, 10vw, 50px);
+      font-size: clamp(30px, 9vw, 46px);
       max-width: calc(100vw - 40px);
     }
 
     #approach-float {
-      white-space: normal;
-      width: calc(100vw - 40px);
+      width: auto;
+      max-width: calc(100vw - 40px);
+      white-space: nowrap;
       text-align: center;
-      line-height: 0.98;
+      line-height: 1;
     }
 
     .section-subtitle {
@@ -658,7 +640,7 @@
     }
 
     footer {
-      padding: 26px 20px;
+      padding: 24px 20px;
       justify-content: center;
       text-align: center;
       gap: 12px;
@@ -674,12 +656,6 @@
 
     .modal-title {
       font-size: 26px;
-    }
-
-    /* keep scroll/floating elegant but calmer on mobile */
-    #optellie-float,
-    #approach-float {
-      will-change: transform, top, left, font-size, opacity;
     }
   }
 
@@ -818,11 +794,14 @@ let appFixedCX = 0;
 let appFixedTop = 0;
 let appFontPx = 0;
 
+function isMobile() {
+  return window.innerWidth <= 768;
+}
+
 function lerp(a, b, t) { return a + (b - a) * t; }
 function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
 function easeInOut(t) { return t < 0.5 ? 2*t*t : -1 + (4 - 2*t) * t; }
-function easeOutQuart(t) { return 1 - Math.pow(1 - t, 4); }
-function isMobile() { return window.innerWidth <= 768; }
+function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
 
 window.addEventListener('scroll', () => {
   nav.classList.toggle('scrolled', window.scrollY > 40);
@@ -840,12 +819,12 @@ const revealObs = new IntersectionObserver((entries) => {
 revealItems.forEach(el => revealObs.observe(el));
 
 function snapshot() {
+  const lineGap = isMobile() ? 22 : 40;
+
   optStartCX = window.innerWidth / 2;
 
   const ruleRect = rule.getBoundingClientRect();
   optFontPx = parseFloat(window.getComputedStyle(anchor).fontSize);
-
-  const lineGap = isMobile() ? 24 : 40;
   optStartTop = ruleRect.top - lineGap - optFontPx;
 
   const ar = approachAnchor.getBoundingClientRect();
@@ -854,36 +833,36 @@ function snapshot() {
   appFixedTop = ar.top + window.scrollY;
 }
 
-function positionOptellie(sy, vh) {
-  const navTop = isMobile() ? 18 : 24;
-  const navLeft = isMobile() ? 20 : 48;
-  const navFont = isMobile() ? 15 : 20;
-  const navSpacing = isMobile() ? 0.16 : 0.22;
-  const navIcon = isMobile() ? 14 : 18;
-  const navGap = isMobile() ? 8 : 10;
+function positionOptellie(scrollY, vh) {
+  const NAV_TOP = isMobile() ? 18 : 24;
+  const NAV_LEFT = isMobile() ? 18 : 48;
+  const NAV_FONT = isMobile() ? 14 : 20;
+  const NAV_SPACING = isMobile() ? 0.14 : 0.22;
+  const NAV_ICON_W = isMobile() ? 14 : 18;
+  const NAV_GAP = isMobile() ? 8 : 10;
 
-  // vertical motion follows scroll 1:1
-  const optTop = Math.max(navTop, optStartTop - sy);
+  // slower + smoother upward motion on both desktop and mobile
+  const verticalDistance = Math.max(optStartTop - NAV_TOP, 1);
+  const slowFactor = isMobile() ? 1.55 : 1.8;
+  const effectiveScroll = scrollY / slowFactor;
+  const rawVertical = clamp(effectiveScroll / verticalDistance, 0, 1);
+  const verticalT = easeOutCubic(rawVertical);
 
-  // font shrink based on travel distance
-  const heroTravel = Math.max(optStartTop - navTop, 1);
-  const tA = clamp((optStartTop - optTop) / heroTravel, 0, 1);
-  const optFont = lerp(optFontPx, navFont, easeOutQuart(tA));
+  const optTop = lerp(optStartTop, NAV_TOP, verticalT);
+  const optFont = lerp(optFontPx, NAV_FONT, verticalT);
 
+  // horizontal move later on mobile so it doesn't fight the top bar
   const pillarsViewTop = pillars.getBoundingClientRect().top;
+  const startOffset = isMobile() ? vh * 0.02 : vh * 0.10;
+  const moveRange = isMobile() ? vh * 0.32 : vh * 0.30;
+  const rawHorizontal = clamp((startOffset - pillarsViewTop) / moveRange, 0, 1);
+  const horizontalT = easeInOut(rawHorizontal);
 
-  // start the horizontal move later on mobile so layout feels calmer
-  const triggerOffset = isMobile() ? vh * 0.04 : vh * 0.10;
-  const triggerRange  = isMobile() ? vh * 0.24 : vh * 0.30;
-
-  const bRaw = clamp((triggerOffset - pillarsViewTop) / triggerRange, 0, 1);
-  const tB = easeInOut(bRaw);
-
-  const optLeft = lerp(optStartCX, navLeft, tB);
-  const optTranslateX = lerp(-50, 0, tB);
-  const optSpacing = lerp(isMobile() ? 0.08 : 0.12, navSpacing, tB);
-  const optIconW = lerp(0, navIcon, tB);
-  const optGapNow = lerp(0, navGap, tB);
+  const optLeft = lerp(optStartCX, NAV_LEFT, horizontalT);
+  const optTranslateX = lerp(-50, 0, horizontalT);
+  const optSpacing = lerp(isMobile() ? 0.08 : 0.12, NAV_SPACING, horizontalT);
+  const optIconW = lerp(0, NAV_ICON_W, horizontalT);
+  const optGapNow = lerp(0, NAV_GAP, horizontalT);
 
   floatEl.style.transform = `translateX(${optTranslateX}%)`;
   floatEl.style.left = optLeft + 'px';
@@ -893,48 +872,69 @@ function positionOptellie(sy, vh) {
   floatEl.style.gap = optGapNow + 'px';
   floatIcon.style.width = optIconW + 'px';
   floatIcon.style.height = optIconW + 'px';
-  floatIcon.style.opacity = tB;
+  floatIcon.style.opacity = horizontalT;
 
   if (!optReady) {
     floatEl.style.opacity = '1';
     optReady = true;
   }
 
-  floatEl.style.pointerEvents = tB > 0.95 ? 'all' : 'none';
-  floatEl.style.cursor = tB > 0.95 ? 'pointer' : 'default';
-  floatEl.onclick = tB > 0.95
+  floatEl.style.pointerEvents = horizontalT > 0.95 ? 'all' : 'none';
+  floatEl.style.cursor = horizontalT > 0.95 ? 'pointer' : 'default';
+  floatEl.onclick = horizontalT > 0.95
     ? () => window.scrollTo({ top: 0, behavior: 'smooth' })
     : null;
 }
 
-function positionApproach(sy, vh) {
-  const navTop = isMobile() ? 18 : 24;
-  const appViewportStart = appFixedTop - sy;
+function positionApproach(scrollY, vh) {
+  const NAV_TOP = isMobile() ? 18 : 24;
 
-  const appStartOffset = isMobile() ? vh * 0.52 : vh * 0.42;
-  const appTravelRange = isMobile() ? vh * 0.44 : vh * 0.52;
+  if (isMobile()) {
+    // mobile: simpler, cleaner top behavior to avoid overlap/glitching
+    const sectionTop = pillars.getBoundingClientRect().top;
+    const start = vh * 0.72;
+    const end = NAV_TOP + 8;
+
+    const raw = clamp((start - sectionTop) / (start - end), 0, 1);
+    const t = easeOutCubic(raw);
+
+    const currentTop = lerp(start, NAV_TOP, t);
+    const currentFont = lerp(appFontPx * 0.95, 18, t);
+    const fade = clamp((start - sectionTop) / (vh * 0.22), 0, 1);
+
+    approachFloat.style.left = '50%';
+    approachFloat.style.top = currentTop + 'px';
+    approachFloat.style.fontSize = currentFont + 'px';
+    approachFloat.style.opacity = fade;
+    approachFloat.style.transform = 'translateX(-50%)';
+    return;
+  }
+
+  // desktop: preserve existing feel
+  const appViewportStart = appFixedTop - scrollY;
+  const appStartOffset = vh * 0.42;
+  const appTravelRange = vh * 0.52;
 
   const appRaw = clamp((appStartOffset - appViewportStart) / appTravelRange, 0, 1);
   const appProgress = easeInOut(appRaw);
 
-  const appTop = lerp(appViewportStart, navTop, appProgress);
-  const approachNavFont = isMobile() ? 20 : 24;
-  const appFontNow = lerp(appFontPx, approachNavFont, appProgress);
-
-  const fadeIn = clamp((vh - appViewportStart) / (vh * (isMobile() ? 0.24 : 0.20)), 0, 1);
+  const appTop = lerp(appViewportStart, NAV_TOP, appProgress);
+  const appFontNow = lerp(appFontPx, 24, appProgress);
+  const fadeIn = clamp((vh - appViewportStart) / (vh * 0.20), 0, 1);
 
   approachFloat.style.left = appFixedCX + 'px';
   approachFloat.style.top = appTop + 'px';
   approachFloat.style.fontSize = appFontNow + 'px';
-  approachFloat.style.opacity = easeOutQuart(fadeIn);
+  approachFloat.style.opacity = easeOutCubic(fadeIn);
+  approachFloat.style.transform = 'translateX(-50%)';
 }
 
 function positionAll() {
-  const sy = window.scrollY;
+  const scrollY = window.scrollY;
   const vh = window.innerHeight;
 
-  positionOptellie(sy, vh);
-  positionApproach(sy, vh);
+  positionOptellie(scrollY, vh);
+  positionApproach(scrollY, vh);
 }
 
 function onResize() {
