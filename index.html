@@ -6,11 +6,11 @@
 <title>Optellie — Intelligence for industry</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Inter:wght@200;300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@200;300;400;500&display=swap" rel="stylesheet">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html { scroll-behavior: smooth; }
- 
+
   body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     background: #0F1210;
@@ -19,14 +19,12 @@
     font-weight: 300;
     overflow-x: hidden;
   }
- 
- 
+
   #float-icon {
     flex-shrink: 0;
     opacity: 0;
   }
- 
-  /* ─── Nav (right side only — logo is the float) ─────────────── */
+
   nav {
     position: fixed;
     top: 0; left: 0; right: 0;
@@ -61,8 +59,7 @@
     transition: border-color 0.3s, color 0.3s;
   }
   .nav-cta:hover { border-color: #C9A770; color: #C9A770; }
- 
-  /* ─── Hero ───────────────────────────────────────────────────── */
+
   .hero {
     position: relative;
     min-height: 100vh;
@@ -81,13 +78,12 @@
       radial-gradient(ellipse 40% 30% at 50% 85%, #7A5A22 0%, #3A2A10 50%, transparent 100%),
       linear-gradient(135deg, #1A1D1B 0%, #0F1210 100%);
     filter: saturate(0.85);
-    /* Replace with real photo: background: url('photo.jpg') center/cover no-repeat; */
   }
   .hero-vignette {
     position: absolute; inset: 0;
     background: radial-gradient(ellipse at center, transparent 28%, rgba(0,0,0,0.68) 100%);
   }
- 
+
   .hero-content {
     position: relative;
     z-index: 2;
@@ -96,12 +92,7 @@
     flex-direction: column;
     align-items: center;
   }
- 
-  /*
-    Invisible anchor — same font/size as the floating optellie.
-    The floating element reads this element's position via getBoundingClientRect()
-    so it knows exactly where to sit, on any screen size.
-  */
+
   #hero-anchor {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     font-weight: 200;
@@ -114,10 +105,9 @@
     user-select: none;
     pointer-events: none;
     margin-bottom: 20px;
-    /* Shrink to fit on any screen without wrapping */
     max-width: 90vw;
   }
- 
+
   #optellie-float {
     position: fixed;
     top: 0; left: 0;
@@ -131,9 +121,8 @@
     gap: 0px;
     pointer-events: none;
     white-space: nowrap;
-    /* transform-origin set by JS depending on phase */
   }
- 
+
   .brand-rule {
     width: 80%;
     height: 1px;
@@ -178,8 +167,7 @@
     transition: background 0.3s, transform 0.3s;
   }
   .cta-primary:hover { background: #C9A770; transform: translateY(-1px); }
- 
-  /* WIP */
+
   .wip-inline { display: flex; align-items: center; gap: 9px; }
   @keyframes wip-pulse { 0%,100%{ opacity:0.3; transform:scale(1); } 50%{ opacity:1; transform:scale(1.45); } }
   .wip-dot {
@@ -189,7 +177,7 @@
   .wip-label { font-size:11px; letter-spacing:0.2em; text-transform:uppercase; color:rgba(201,167,112,0.65); font-weight:400; }
   .wip-sep { width:1px; height:9px; background:rgba(201,167,112,0.22); }
   .wip-label-dim { font-size:11px; letter-spacing:0.18em; text-transform:uppercase; color:rgba(245,241,234,0.28); font-weight:300; }
- 
+
   .scroll-hint {
     position: absolute; bottom: 36px; left: 50%;
     transform: translateX(-50%);
@@ -201,18 +189,47 @@
     0%,100% { transform: translate(-50%,0); opacity:0.4; }
     50%     { transform: translate(-50%,8px); opacity:0.8; }
   }
- 
-  /* ─── Pillars ────────────────────────────────────────────────── */
-  .pillars { padding: 160px 48px 180px; background: #0B0D0C; }
+
+  .pillars { padding: 120px 48px 180px; background: #0B0D0C; }
   .pillars-inner { max-width: 1100px; margin: 0 auto; }
-  .section-eyebrow {
-    font-size:11px; letter-spacing:0.3em; text-transform:uppercase;
-    color:rgba(245,241,234,0.38); margin-bottom:20px; text-align:center;
-  }
-  .section-title {
+
+  #approach-float {
+    position: fixed;
+    z-index: 190;
     font-family: 'Cormorant Garamond', Georgia, serif;
-    font-size: clamp(30px,4vw,44px); font-weight:400;
-    text-align:center; margin-bottom:100px; letter-spacing:-0.01em; color:#F5F1EA;
+    font-weight: 600;
+    color: rgba(245,241,234,0.98);
+    white-space: nowrap;
+    pointer-events: none;
+    transform: translateX(-50%);
+    letter-spacing: -0.015em;
+    text-shadow: 0 0 18px rgba(0,0,0,0.2);
+  }
+
+  #approach-anchor {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-weight: 600;
+    font-size: clamp(36px, 5.8vw, 64px);
+    letter-spacing: -0.015em;
+    visibility: hidden;
+    user-select: none;
+    pointer-events: none;
+    text-align: center;
+    line-height: 1;
+    display: block;
+    margin: 0 auto 0;
+  }
+
+  .section-subtitle {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 13px;
+    font-weight: 300;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(245,241,234,0.38);
+    text-align: center;
+    margin-top: 60px;
+    margin-bottom: 80px;
   }
   .pillar {
     display: grid; grid-template-columns: 120px 1fr;
@@ -232,8 +249,7 @@
   .pillar-number { font-family:'Cormorant Garamond',Georgia,serif; font-size:64px; color:#C9A770; line-height:1; font-weight:400; }
   .pillar-label  { font-size:13px; letter-spacing:0.2em; text-transform:uppercase; color:#F5F1EA; margin-bottom:16px; font-weight:500; }
   .pillar-text   { font-size:17px; line-height:1.65; color:rgba(245,241,234,0.65); max-width:600px; font-weight:300; }
- 
-  /* ─── Footer ─────────────────────────────────────────────────── */
+
   footer {
     background: #0B0D0C; padding: 36px 48px;
     border-top: 1px solid rgba(245,241,234,0.07);
@@ -241,8 +257,7 @@
     font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase;
     color: rgba(245,241,234,0.32); flex-wrap: wrap; gap: 14px;
   }
- 
-  /* ─── Modal ──────────────────────────────────────────────────── */
+
   .modal-overlay {
     display:none; position:fixed; inset:0; background:rgba(0,0,0,0.72);
     z-index:500; align-items:center; justify-content:center;
@@ -268,8 +283,7 @@
   .modal-success { display:none; text-align:center; padding:20px 0 8px; }
   .modal-success p { font-family:'Cormorant Garamond',Georgia,serif; font-size:26px; color:#F5F1EA; margin-bottom:8px; }
   .modal-success span { font-size:13px; color:rgba(245,241,234,0.42); }
- 
-  /* ─── Responsive ─────────────────────────────────────────────── */
+
   @media (max-width: 768px) {
     nav { padding: 20px 24px; }
     .hero { padding: 0 24px; }
@@ -277,7 +291,6 @@
     footer { padding: 28px 24px; justify-content: center; text-align: center; }
     .pillar { grid-template-columns: 1fr; gap: 16px; padding: 40px 0; }
     .pillar-number { font-size: 48px; }
-    .section-title { margin-bottom: 64px; }
     .modal { padding: 32px 24px; }
   }
   @media (prefers-reduced-motion: reduce) {
@@ -288,8 +301,7 @@
 </style>
 </head>
 <body>
- 
-<!-- The floating Optellie — starts hidden, JS positions then reveals -->
+
 <div id="optellie-float" style="opacity:0;">
   <svg id="float-icon" width="18" height="18" viewBox="0 0 22 22" fill="none" style="flex-shrink:0;">
     <circle cx="11" cy="11" r="10" stroke="#F5F1EA" stroke-width="1"/>
@@ -297,32 +309,27 @@
   </svg>
   <span id="float-text">optellie</span>
 </div>
- 
-<!-- Nav: right side only -->
+
+<div id="approach-float" style="opacity:0;">Our approach</div>
+
 <nav id="nav">
   <div class="nav-right">
     <button class="nav-cta" onclick="openModal()">Get in touch</button>
   </div>
 </nav>
- 
-<!-- Hero -->
+
 <section class="hero" id="hero">
   <div class="hero-bg"></div>
   <div class="hero-vignette"></div>
- 
+
   <div class="hero-content">
-    <!--
-      Invisible anchor: exact same font/size/weight as the floating text.
-      JS reads its getBoundingClientRect() for pixel-perfect start position.
-      visibility:hidden keeps the space so the rule and tagline stay below it.
-    -->
     <div id="hero-anchor">optellie</div>
- 
+
     <div class="brand-rule"></div>
     <div class="brand-tagline">Intelligence for industry</div>
- 
+
     <p>Bringing quiet intelligence to the manufacturing floor — turning everyday operations into clear, connected, continuously improving systems. Private by design. Built for the people who actually run the line.</p>
- 
+
     <div class="hero-actions">
       <a href="#approach" class="cta-primary">Learn more</a>
       <div class="wip-inline">
@@ -333,16 +340,15 @@
       </div>
     </div>
   </div>
- 
+
   <div class="scroll-hint">Scroll ↓</div>
 </section>
- 
-<!-- Pillars -->
+
 <section class="pillars" id="approach">
   <div class="pillars-inner">
-    <div class="section-eyebrow">— Our approach</div>
-    <h2 class="section-title">Three steps. One continuous loop.</h2>
- 
+    <div id="approach-anchor">Our approach</div>
+    <div class="section-subtitle">Three steps. One continuous loop.</div>
+
     <div class="pillar" data-reveal>
       <div class="pillar-number">01</div>
       <div>
@@ -350,7 +356,7 @@
         <p class="pillar-text">Training, SOPs, tribal knowledge — structured and made useful without leaving your walls. Nothing leaves the plant, nothing gets uploaded to someone else's cloud.</p>
       </div>
     </div>
- 
+
     <div class="pillar" data-reveal>
       <div class="pillar-number">02</div>
       <div>
@@ -358,7 +364,7 @@
         <p class="pillar-text">Clear, hands-on guidance the way your team actually works — visual, direct, no jargon. Built for the people running the line, not the people selling software.</p>
       </div>
     </div>
- 
+
     <div class="pillar" data-reveal>
       <div class="pillar-number">03</div>
       <div>
@@ -368,14 +374,13 @@
     </div>
   </div>
 </section>
- 
+
 <footer id="contact">
   <span>© 2026 Optellie</span>
   <span>Private. Local. Industrial.</span>
   <button class="nav-cta" onclick="openModal()" style="font-size:10px;padding:8px 16px;color:rgba(245,241,234,0.32);border-color:rgba(245,241,234,0.12);">Get in touch</button>
 </footer>
- 
-<!-- Modal -->
+
 <div class="modal-overlay" id="modal" onclick="handleOverlayClick(event)">
   <div class="modal">
     <div id="modal-form">
@@ -396,131 +401,141 @@
     </div>
   </div>
 </div>
- 
+
 <script>
-// ── Nav backdrop ────────────────────────────────────────────────────────
 const nav = document.getElementById('nav');
 window.addEventListener('scroll', () => {
   nav.classList.toggle('scrolled', window.scrollY > 40);
 }, { passive: true });
- 
-// ── Pillar reveal ───────────────────────────────────────────────────────
+
 const revealObs = new IntersectionObserver((entries) => {
   entries.forEach(e => {
-    if (e.isIntersecting) { e.target.classList.add('visible'); revealObs.unobserve(e.target); }
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      revealObs.unobserve(e.target);
+    }
   });
 }, { threshold: 0.25, rootMargin: '0px 0px -80px 0px' });
 document.querySelectorAll('[data-reveal]').forEach(el => revealObs.observe(el));
- 
-// ── Floating Optellie ───────────────────────────────────────────────────
-const floatEl   = document.getElementById('optellie-float');
-const floatIcon = document.getElementById('float-icon');
-const anchor    = document.getElementById('hero-anchor');
-const rule      = document.querySelector('.brand-rule');
-const hero      = document.getElementById('hero');
- 
+
+function lerp(a, b, t) { return a + (b - a) * t; }
+function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+function easeInOut(t) { return t < 0.5 ? 2*t*t : -1+(4-2*t)*t; }
+function easeOutQuart(t) { return 1 - Math.pow(1 - t, 4); }
+
 const NAV_LEFT    = 48;
 const NAV_TOP     = 24;
-const NAV_FONT    = 13;
+const NAV_FONT    = 20;
 const NAV_SPACING = 0.22;
 const NAV_ICON_W  = 18;
 const NAV_GAP     = 10;
-const LINE_GAP    = 20; // fixed px gap between bottom of optellie text and the rule line
- 
-function lerp(a, b, t) { return a + (b - a) * t; }
-function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
- 
-// Viewport-space start coords, captured once. Never updated during scroll.
-let fixedStartCenterX = 0; // center X of viewport
-let fixedStartTop     = 0; // top of where optellie text should sit
-let startFontPx       = 0;
-let initialized       = false;
- 
+const LINE_GAP    = 40;
+
+const floatEl        = document.getElementById('optellie-float');
+const floatIcon      = document.getElementById('float-icon');
+const anchor         = document.getElementById('hero-anchor');
+const rule           = document.querySelector('.brand-rule');
+const hero           = document.getElementById('hero');
+const pillars        = document.getElementById('approach');
+const approachFloat  = document.getElementById('approach-float');
+const approachAnchor = document.getElementById('approach-anchor');
+
+let optStartCX = 0, optStartTop = 0, optFontPx = 0, optReady = false;
+let appFixedCX = 0, appFixedTop = 0, appFontPx = 0;
+
 function snapshot() {
-  // Always center X in the viewport — matches hero-content centering
-  fixedStartCenterX = window.innerWidth / 2;
- 
-  // Position Y: sit exactly LINE_GAP above the rule line
-  const ruleRect   = rule.getBoundingClientRect();
-  startFontPx      = parseFloat(window.getComputedStyle(anchor).fontSize);
-  fixedStartTop    = ruleRect.top - LINE_GAP - startFontPx; // top of the text block
+  optStartCX = window.innerWidth / 2;
+  const ruleRect = rule.getBoundingClientRect();
+  optFontPx = parseFloat(window.getComputedStyle(anchor).fontSize);
+  optStartTop = ruleRect.top - LINE_GAP - optFontPx;
+
+  appFixedCX = window.innerWidth / 2;
+  const ar = approachAnchor.getBoundingClientRect();
+  appFontPx = parseFloat(window.getComputedStyle(approachAnchor).fontSize);
+  appFixedTop = ar.top + window.scrollY;
 }
- 
-function positionFloat() {
+
+function positionAll() {
+  const sy = window.scrollY;
+  const vh = window.innerHeight;
   const heroH = hero.offsetHeight;
-  const sy    = window.scrollY;
-  const t     = clamp(sy / (heroH * 0.5), 0, 1);
- 
-  const p1      = clamp(t / 0.4, 0, 1);
-  const p2      = clamp((t - 0.4) / 0.6, 0, 1);
-  const p1Eased = 1 - Math.pow(1 - p1, 3); // ease-out cubic for vertical
- 
-  // Vertical
-  const midTop = NAV_TOP + (fixedStartTop - NAV_TOP) * 0.08;
-  const topNow = t < 0.4
-    ? lerp(fixedStartTop, midTop, p1Eased)
-    : lerp(midTop, NAV_TOP, p2);
- 
-  // Font
-  const midFont  = lerp(startFontPx, NAV_FONT, 0.75);
-  const fontSize = t < 0.4
-    ? lerp(startFontPx, midFont, p1Eased)
-    : lerp(midFont, NAV_FONT, p2);
- 
-  // Letter spacing / icon / gap
-  const letterSpacing = lerp(0.12, NAV_SPACING, p2);
-  const iconW         = lerp(0, NAV_ICON_W, p2);
-  const gap           = lerp(0, NAV_GAP, p2);
- 
-  // Horizontal:
-  // Phase 1 — stay centered (left = centerX, transform: translateX(-50%))
-  // Phase 2 — blend toward left-aligned nav position
-  // We interpolate the left value AND the translateX offset simultaneously
-  const translateXPct = lerp(-50, 0, p2); // -50% centered → 0% left-aligned
-  const leftX = t < 0.4
-    ? fixedStartCenterX                             // fixed center
-    : lerp(fixedStartCenterX, NAV_LEFT, p2);        // sweep left
- 
-  floatEl.style.transform     = `translateX(${translateXPct}%)`;
-  floatEl.style.left          = leftX + 'px';
-  floatEl.style.top           = topNow + 'px';
-  floatEl.style.fontSize      = fontSize + 'px';
-  floatEl.style.letterSpacing = letterSpacing + 'em';
-  floatEl.style.gap           = gap + 'px';
- 
-  floatIcon.style.width   = iconW + 'px';
-  floatIcon.style.height  = iconW + 'px';
-  floatIcon.style.opacity = p2;
- 
-  // Reveal the float only after first position is applied — prevents flash
-  if (!initialized) {
+
+  // OPTELLIE upward motion: cleaner, no extra secondary nudge
+  const tA = clamp(sy / (heroH * 0.22), 0, 1);
+  const rise = easeOutQuart(tA);
+
+  const optTop = lerp(optStartTop, NAV_TOP, rise);
+  const optFont = lerp(optFontPx, NAV_FONT, rise);
+
+  // OPTELLIE left motion: begins slightly later
+  const pillarsViewTop = pillars.getBoundingClientRect().top;
+  const bRaw = clamp((vh * 0.10 - pillarsViewTop) / (vh * 0.30), 0, 1);
+  const tB = easeInOut(bRaw);
+
+  const optLeft       = lerp(optStartCX, NAV_LEFT, tB);
+  const optTranslateX = lerp(-50, 0, tB);
+  const optSpacing    = lerp(0.12, NAV_SPACING, tB);
+  const optIconW      = lerp(0, NAV_ICON_W, tB);
+  const optGap        = lerp(0, NAV_GAP, tB);
+
+  floatEl.style.transform     = `translateX(${optTranslateX}%)`;
+  floatEl.style.left          = optLeft + 'px';
+  floatEl.style.top           = optTop + 'px';
+  floatEl.style.fontSize      = optFont + 'px';
+  floatEl.style.letterSpacing = optSpacing + 'em';
+  floatEl.style.gap           = optGap + 'px';
+  floatIcon.style.width       = optIconW + 'px';
+  floatIcon.style.height      = optIconW + 'px';
+  floatIcon.style.opacity     = tB;
+
+  if (!optReady) {
     floatEl.style.opacity = '1';
-    initialized = true;
+    optReady = true;
   }
- 
-  floatEl.style.pointerEvents = t > 0.95 ? 'all' : 'none';
-  floatEl.style.cursor = t > 0.95 ? 'pointer' : 'default';
-  floatEl.onclick = t > 0.95
+
+  floatEl.style.pointerEvents = tB > 0.95 ? 'all' : 'none';
+  floatEl.style.cursor = tB > 0.95 ? 'pointer' : 'default';
+  floatEl.onclick = tB > 0.95
     ? () => window.scrollTo({ top: 0, behavior: 'smooth' })
     : null;
+
+  // Our approach: prominent, stays visible
+  const appViewportStart = appFixedTop - sy;
+  const appStartOffset = vh * 0.42;
+  const appTravelRange = vh * 0.52;
+
+  const appRaw = clamp((appStartOffset - appViewportStart) / appTravelRange, 0, 1);
+  const appProgress = easeInOut(appRaw);
+
+  const appTop = lerp(appViewportStart, NAV_TOP, appProgress);
+
+  // Slightly smaller than the last version’s animated feel, while stronger visually
+  const APPROACH_NAV_FONT = 24;
+  const appFontNow = lerp(appFontPx, APPROACH_NAV_FONT, appProgress);
+
+  const fadeIn = clamp((vh - appViewportStart) / (vh * 0.20), 0, 1);
+
+  approachFloat.style.left = appFixedCX + 'px';
+  approachFloat.style.top = appTop + 'px';
+  approachFloat.style.fontSize = appFontNow + 'px';
+  approachFloat.style.opacity = easeOutQuart(fadeIn);
 }
- 
+
 function onResize() {
   snapshot();
-  positionFloat();
+  positionAll();
 }
- 
-// Use requestAnimationFrame to ensure fonts + layout are fully painted before first measure
+
 requestAnimationFrame(() => {
-  requestAnimationFrame(() => { // double rAF — guarantees post-paint
+  requestAnimationFrame(() => {
     snapshot();
-    positionFloat();
+    positionAll();
   });
 });
-window.addEventListener('scroll', positionFloat, { passive: true });
+
+window.addEventListener('scroll', positionAll, { passive: true });
 window.addEventListener('resize', onResize, { passive: true });
- 
-// ── Modal ───────────────────────────────────────────────────────────────
+
 function openModal() {
   document.getElementById('modal-form').style.display = 'block';
   document.getElementById('modal-success').style.display = 'none';
@@ -532,20 +547,28 @@ function closeModal() {
 function handleOverlayClick(e) {
   if (e.target.id === 'modal') closeModal();
 }
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
- 
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+});
+
 function sendEmail() {
-  const name    = document.getElementById('modal-name').value.trim();
-  const email   = document.getElementById('modal-email').value.trim();
+  const name = document.getElementById('modal-name').value.trim();
+  const email = document.getElementById('modal-email').value.trim();
   const message = document.getElementById('modal-message').value.trim();
-  if (!name || !email || !message) { alert('Please fill in all fields.'); return; }
+
+  if (!name || !email || !message) {
+    alert('Please fill in all fields.');
+    return;
+  }
+
   const subject = encodeURIComponent('Optellie — Inquiry from ' + name);
-  const body    = encodeURIComponent('Name: ' + name + '\nEmail: ' + email + '\n\n' + message);
+  const body = encodeURIComponent('Name: ' + name + '\nEmail: ' + email + '\n\n' + message);
   window.location.href = 'mailto:penpanthersam@gmail.com?subject=' + subject + '&body=' + body;
+
   document.getElementById('modal-form').style.display = 'none';
   document.getElementById('modal-success').style.display = 'block';
 }
 </script>
- 
+
 </body>
 </html>
