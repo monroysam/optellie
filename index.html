@@ -140,6 +140,8 @@
     gap: 0;
     pointer-events: none;
     white-space: nowrap;
+    backface-visibility: hidden;
+    -webkit-font-smoothing: antialiased;
   }
 
   .brand-rule {
@@ -278,6 +280,8 @@
     transform: translateX(-50%);
     letter-spacing: -0.015em;
     text-shadow: 0 0 18px rgba(0,0,0,0.2);
+    backface-visibility: hidden;
+    -webkit-font-smoothing: antialiased;
   }
 
   #approach-anchor {
@@ -601,7 +605,6 @@
     }
 
     #approach-float {
-      width: auto;
       max-width: calc(100vw - 40px);
       white-space: nowrap;
       text-align: center;
@@ -780,7 +783,6 @@ const floatEl = document.getElementById('optellie-float');
 const floatIcon = document.getElementById('float-icon');
 const anchor = document.getElementById('hero-anchor');
 const rule = document.querySelector('.brand-rule');
-const hero = document.getElementById('hero');
 const pillars = document.getElementById('approach');
 const approachFloat = document.getElementById('approach-float');
 const approachAnchor = document.getElementById('approach-anchor');
@@ -822,7 +824,6 @@ function snapshot() {
   const lineGap = isMobile() ? 22 : 40;
 
   optStartCX = window.innerWidth / 2;
-
   const ruleRect = rule.getBoundingClientRect();
   optFontPx = parseFloat(window.getComputedStyle(anchor).fontSize);
   optStartTop = ruleRect.top - lineGap - optFontPx;
@@ -841,7 +842,6 @@ function positionOptellie(scrollY, vh) {
   const NAV_ICON_W = isMobile() ? 14 : 18;
   const NAV_GAP = isMobile() ? 8 : 10;
 
-  // slower + smoother upward motion on both desktop and mobile
   const verticalDistance = Math.max(optStartTop - NAV_TOP, 1);
   const slowFactor = isMobile() ? 1.55 : 1.8;
   const effectiveScroll = scrollY / slowFactor;
@@ -851,7 +851,6 @@ function positionOptellie(scrollY, vh) {
   const optTop = lerp(optStartTop, NAV_TOP, verticalT);
   const optFont = lerp(optFontPx, NAV_FONT, verticalT);
 
-  // horizontal move later on mobile so it doesn't fight the top bar
   const pillarsViewTop = pillars.getBoundingClientRect().top;
   const startOffset = isMobile() ? vh * 0.02 : vh * 0.10;
   const moveRange = isMobile() ? vh * 0.32 : vh * 0.30;
@@ -888,39 +887,19 @@ function positionOptellie(scrollY, vh) {
 
 function positionApproach(scrollY, vh) {
   const NAV_TOP = isMobile() ? 18 : 24;
-
-  if (isMobile()) {
-    // mobile: simpler, cleaner top behavior to avoid overlap/glitching
-    const sectionTop = pillars.getBoundingClientRect().top;
-    const start = vh * 0.72;
-    const end = NAV_TOP + 8;
-
-    const raw = clamp((start - sectionTop) / (start - end), 0, 1);
-    const t = easeOutCubic(raw);
-
-    const currentTop = lerp(start, NAV_TOP, t);
-    const currentFont = lerp(appFontPx * 0.95, 18, t);
-    const fade = clamp((start - sectionTop) / (vh * 0.22), 0, 1);
-
-    approachFloat.style.left = '50%';
-    approachFloat.style.top = currentTop + 'px';
-    approachFloat.style.fontSize = currentFont + 'px';
-    approachFloat.style.opacity = fade;
-    approachFloat.style.transform = 'translateX(-50%)';
-    return;
-  }
-
-  // desktop: preserve existing feel
   const appViewportStart = appFixedTop - scrollY;
-  const appStartOffset = vh * 0.42;
-  const appTravelRange = vh * 0.52;
+
+  // Use the desktop timing model on both, just scaled for mobile
+  const appStartOffset = isMobile() ? vh * 0.48 : vh * 0.42;
+  const appTravelRange = isMobile() ? vh * 0.58 : vh * 0.52;
+  const navFont = isMobile() ? 18 : 24;
 
   const appRaw = clamp((appStartOffset - appViewportStart) / appTravelRange, 0, 1);
   const appProgress = easeInOut(appRaw);
 
   const appTop = lerp(appViewportStart, NAV_TOP, appProgress);
-  const appFontNow = lerp(appFontPx, 24, appProgress);
-  const fadeIn = clamp((vh - appViewportStart) / (vh * 0.20), 0, 1);
+  const appFontNow = lerp(appFontPx, navFont, appProgress);
+  const fadeIn = clamp((vh - appViewportStart) / (vh * (isMobile() ? 0.24 : 0.20)), 0, 1);
 
   approachFloat.style.left = appFixedCX + 'px';
   approachFloat.style.top = appTop + 'px';
