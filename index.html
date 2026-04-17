@@ -286,8 +286,12 @@ footer{
 <script>
 // ═══════════════════════════════════════════════════════════════════════
 // TRANSFORM-ONLY ANIMATION ENGINE
-// Keeps the stable mobile method from the current file,
-// but restores the earlier animation feel.
+// Keeps the current stable mobile method.
+// Fixes:
+// 1) Desktop OPTELLIE goes straight up, then left later
+// 2) Our approach moves much later
+// 3) Our approach does not disappear near page end
+// 4) Mobile keeps same method and stops getting buggy
 // ═══════════════════════════════════════════════════════════════════════
 
 const navEl      = document.getElementById('nav');
@@ -368,44 +372,23 @@ function frame() {
 
   navEl.classList.toggle('scrolled', sy > 40);
 
-  // ═══════════════════════════════════════════════════════════════════
-  // OPTELLIE
-  // Restore earlier feel:
-  // 1) quicker initial launch upward
-  // 2) gentle settle into nav top
-  // 3) sweep left later as approach section nears top
-  // Still fully transform-based for mobile stability
-  // ═══════════════════════════════════════════════════════════════════
-  const verticalSpan = Math.max(heroH * (mob ? 0.72 : 0.78), 1);
-  const tA = clamp(sy / verticalSpan, 0, 1);
-
-  const launchCut = 0.34;
-  const p1 = clamp(tA / launchCut, 0, 1);
-  const p2 = clamp((tA - launchCut) / (1 - launchCut), 0, 1);
-
-  const p1s = easeOutQuint(p1);
-  const p2s = easeInOut(p2);
+  // OPTELLIE: straight up first, then left later
+  const verticalSpan = Math.max(heroH * (mob ? 0.82 : 0.88), 1);
+  const verticalRaw  = clamp(sy / verticalSpan, 0, 1);
+  const verticalT    = easeInOut(verticalRaw);
 
   const naturalOptY = O.startAbsY - sy;
-  const midOptY = O.navTop + (naturalOptY - O.navTop) * 0.08;
-
-  let optY;
-  if (tA < launchCut) {
-    optY = lerp(naturalOptY, midOptY, p1s);
-  } else {
-    optY = lerp(midOptY, O.navTop, p2s);
-  }
-
-  const optScale = lerp(1, O.scaleToNav, p1s);
+  const optY        = lerp(naturalOptY, O.navTop, verticalT);
+  const optScale    = lerp(1, O.scaleToNav, verticalT);
 
   const pillarsViewTop = pillarsEl.getBoundingClientRect().top;
-  const sweepStart = mob ? vh * 0.22 : vh * 0.18;
-  const sweepRange = mob ? vh * 0.42 : vh * 0.35;
+  const sweepStart = mob ? vh * 0.08 : vh * 0.02;
+  const sweepRange = mob ? vh * 0.24 : vh * 0.22;
   const bRaw = clamp((sweepStart - pillarsViewTop) / sweepRange, 0, 1);
-  const tB = easeInOut(bRaw);
+  const tB   = easeInOut(bRaw);
 
   const centeredX = O.startCX - (O.iconW + O.textHalfW) * optScale;
-  const optX = lerp(centeredX, O.navLeft, tB);
+  const optX      = lerp(centeredX, O.navLeft, tB);
 
   optEl.style.transform = `translate(${optX.toFixed(2)}px, ${optY.toFixed(2)}px) scale(${optScale.toFixed(4)})`;
   optEl.style.letterSpacing = lerp(mob ? 0.08 : 0.12, mob ? 0.14 : 0.22, tB) + 'em';
@@ -416,30 +399,26 @@ function frame() {
   optEl.style.pointerEvents = settled ? 'all' : 'none';
   optEl.style.cursor = settled ? 'pointer' : 'default';
 
-  // ═══════════════════════════════════════════════════════════════════
-  // OUR APPROACH
-  // Timing referenced from earlier desktop behavior:
-  // stays lower longer, rises later, then settles at nav top
-  // Uses same general logic on mobile, just slightly compressed
-  // ═══════════════════════════════════════════════════════════════════
+  // OUR APPROACH: much later, never disappears while section visible
   const appNaturalY = A.startAbsY - sy;
   const pillarsRect = pillarsEl.getBoundingClientRect();
-  const sectionStillVisible = pillarsRect.bottom > 0;
+  const sectionStillVisible = pillarsRect.bottom > A.navTop;
 
   if (sectionStillVisible) {
-    const riseStart = mob ? vh * 0.38 : vh * 0.42;
-    const riseRange = mob ? vh * 0.56 : vh * 0.52;
-    const appRaw = clamp((riseStart - appNaturalY) / riseRange, 0, 1);
-    const appProg = easeInOut(appRaw);
+    const riseStart = mob ? vh * 0.14 : vh * 0.10;
+    const riseRange = mob ? vh * 0.20 : vh * 0.18;
+    const appRaw    = clamp((riseStart - appNaturalY) / riseRange, 0, 1);
+    const appProg   = easeInOut(appRaw);
 
-    const appY = lerp(appNaturalY, A.navTop, appProg);
-    const appScale = lerp(1, A.scaleToNav, appProg);
-    const appX = A.startCX - A.halfW * appScale;
+    const appY      = lerp(appNaturalY, A.navTop, appProg);
+    const appScale  = lerp(1, A.scaleToNav, appProg);
+    const appX      = A.startCX - A.halfW * appScale;
 
-    const fadeIn = clamp((vh - appNaturalY) / (vh * (mob ? 0.26 : 0.22)), 0, 1);
-    const visible = appNaturalY < vh * 0.98 && pillarsRect.bottom > A.navTop;
+    const fadeInRaw = clamp((vh * 0.92 - appNaturalY) / (vh * 0.16), 0, 1);
+    const fadeIn    = easeInOut(fadeInRaw);
+    const baseOpacity = Math.max(fadeIn, appProg > 0 ? 1 : fadeIn);
 
-    appEl.style.opacity = visible ? easeInOut(fadeIn).toFixed(3) : '0';
+    appEl.style.opacity = baseOpacity.toFixed(3);
     appEl.style.transform = `translate(${appX.toFixed(2)}px, ${appY.toFixed(2)}px) scale(${appScale.toFixed(4)})`;
   } else {
     appEl.style.opacity = '0';
