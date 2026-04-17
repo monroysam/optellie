@@ -339,9 +339,11 @@ function updateMobileNavCta() {
     navCtaTop.style.padding = '';
     navCtaTop.style.borderRadius = '';
     navCtaTop.style.letterSpacing = '';
+    navCtaTop.style.transform = '';
     navCtaText.style.opacity = '';
     navCtaText.style.transform = '';
     navCtaCaret.style.opacity = '';
+    navCtaCaret.style.top = '';
     navCtaCaret.style.transform = '';
     return;
   }
@@ -361,6 +363,7 @@ function updateMobileNavCta() {
   navCtaTop.style.padding = `0 ${padX.toFixed(2)}px`;
   navCtaTop.style.borderRadius = radius.toFixed(2) + 'px';
   navCtaTop.style.letterSpacing = letter.toFixed(3) + 'em';
+  navCtaTop.style.transform = `translateY(${lerp(0, 12, p).toFixed(2)}px)`;
 
   const textFade = clamp((p - 0.10) / 0.52, 0, 1);
   navCtaText.style.opacity = (1 - textFade).toFixed(3);
@@ -368,6 +371,7 @@ function updateMobileNavCta() {
 
   const caretFade = clamp((p - 0.78) / 0.18, 0, 1);
   navCtaCaret.style.opacity = caretFade.toFixed(3);
+  navCtaCaret.style.top = '50%';
   navCtaCaret.style.transform = `translate(-50%,-50%) scale(${lerp(0.72, 0.92, caretFade).toFixed(3)})`;
 
   navCtaTop.classList.toggle('mobile-back', p > 0.82);
@@ -381,8 +385,8 @@ function init(){
   O.navLeft   = mob ? 20 : 48;
   O.navTop    = mob ? 18 : 20;
   O.navFont   = mob ? 12 : 20;
-  O.navIcon   = mob ? 0 : 18;
-  O.navGap    = mob ? 0 : 10;
+  O.navIcon   = 0;
+  O.navGap    = 0;
   O.startLS   = 0.12;
   O.navLS     = mob ? 0.14 : 0.18;
 
@@ -438,7 +442,11 @@ function init(){
     const appFinalH = A.navFont * A.heightRatio;
     const optFinalH = O.navFont * O.textHeightRatio;
     O.mobileAlignedTop = A.navTop + (appFinalH - optFinalH) / 2;
+    O.desktopAlignedTop = O.navTop;
   } else {
+    const appFinalH = A.navFont * A.heightRatio;
+    const optFinalH = O.navFont * O.textHeightRatio;
+    O.desktopAlignedTop = A.navTop + (appFinalH - optFinalH) / 2;
     O.mobileAlignedTop = O.navTop;
   }
   appEl.style.opacity = '0';
@@ -496,14 +504,9 @@ function frame(){
     const optTargetTop = O.mobileAlignedTop;
     const optStartViewY = O.startTop - sy;
     const totalUp = optStartViewY - optTargetTop;
-    let optY;
-    if (p1s >= 1) {
-      optY = optTargetTop;
-    } else if (tA < 0.35) {
-      optY = lerp(optStartViewY, optTargetTop + totalUp * 0.05, p1s);
-    } else {
-      optY = lerp(optTargetTop + totalUp * 0.05, optTargetTop, p2A);
-    }
+    const phase1Y = lerp(optStartViewY, optTargetTop + totalUp * 0.05, p1s);
+    const phase2Y = lerp(optTargetTop + totalUp * 0.05, optTargetTop, p2A);
+    const optY = tA < 0.35 ? phase1Y : phase2Y;
 
     const optScale = lerp(1, O.scaleToNav, p1s);
     const pillarsViewTop = pillarsEl.getBoundingClientRect().top;
@@ -557,9 +560,13 @@ function frame(){
   const p1s = easeOutQuint(p1);
 
   const naturalOptY = O.startAbsY - sy;
-  const midY        = O.navTop + (naturalOptY - O.navTop) * 0.05;
-  const optY        = p1s >= 1 ? O.navTop : lerp(naturalOptY, midY, p1s);
-  const optScale    = lerp(1, O.scaleToNav, p1s);
+  const targetDesktopTop = O.desktopAlignedTop;
+  // Prevent the path from overshooting above the final top line and then dropping down.
+  // Once the natural position reaches the target line, lock the source of the lerp there
+  // so the animation eases into the final position without a last-moment snap.
+  const desktopSourceY = Math.max(naturalOptY, targetDesktopTop);
+  const optY = lerp(desktopSourceY, targetDesktopTop, p1s);
+  const optScale = lerp(1, O.scaleToNav, p1s);
 
   const iconNow = lerp(0, O.navIcon, appProg);
   const gapNow  = lerp(0, O.navGap, appProg);
