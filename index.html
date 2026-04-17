@@ -184,8 +184,23 @@ footer{
 /* ─── MOBILE ──────────────────────────────────────────── */
 @media(max-width:768px){
   nav{padding:16px 20px;}
-  .nav-cta{padding:9px 14px;font-size:10px;letter-spacing:0.14em;}
-  .nav-cta.mobile-back{min-width:36px;padding:7px 0;font-size:17px;}
+  .nav-cta{
+    min-width:122px;
+    height:36px;
+    padding:0 14px;
+    font-size:10px;
+    letter-spacing:0.14em;
+    border-radius:14px;
+  }
+  .nav-cta.mobile-back{
+    width:38px;
+    min-width:38px;
+    height:38px;
+    padding:0;
+    border-radius:999px;
+    font-size:17px;
+    letter-spacing:0;
+  }
   .nav-cta.mobile-back .nav-cta-text{transform:translateY(-75%) scale(0.82);}
   .nav-cta.mobile-back .nav-cta-caret{transform:translate(-50%,-50%) scale(1);}
   #hero-spacer{font-size:clamp(28px,11vw,48px);margin-bottom:14px;}
@@ -341,15 +356,15 @@ function init(){
 
   O.navLeft   = mob ? 20 : 48;
   O.navTop    = mob ? 18 : 20;
-  O.navFont   = mob ? 16 : 20;
-  O.navIcon   = mob ? 14 : 18;
-  O.navGap    = mob ? 8 : 10;
+  O.navFont   = mob ? 14 : 20;
+  O.navIcon   = mob ? 12 : 18;
+  O.navGap    = mob ? 7 : 10;
   O.startLS   = 0.12;
   O.navLS     = mob ? 0.14 : 0.18;
 
   // 40% bigger banner size for Our approach
-  A.navFont   = mob ? 22 : 28;
-  A.navTop    = mob ? (O.navTop - (A.navFont - O.navFont) * 0.15) : 20;
+  A.navFont   = mob ? 30 : 28;
+  A.navTop    = mob ? (O.navTop - (A.navFont - O.navFont) * 0.08) : 20;
 
   // --- OPTELLIE snapshot ---
   const sr = heroSpacer.getBoundingClientRect();
