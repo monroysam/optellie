@@ -35,12 +35,6 @@ nav.scrolled{background:rgba(15,18,16,0.9);backdrop-filter:blur(14px);-webkit-ba
 .nav-cta:hover{border-color:var(--gold);color:var(--gold);}
 
 /* ─── FLOAT ELEMENTS ──────────────────────────────────── */
-/*
-  CRITICAL: top:0, left:0 set permanently.
-  ALL positioning done via transform:translate(x,y) scale(s) only.
-  transform-origin:left top so scale anchors at element's top-left.
-  This means zero layout reflow on any device during animation.
-*/
 #optellie-float{
   position:fixed;top:0;left:0;z-index:200;
   font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
@@ -86,7 +80,7 @@ nav.scrolled{background:rgba(15,18,16,0.9);backdrop-filter:blur(14px);-webkit-ba
   font-family:'Inter',-apple-system,sans-serif;font-weight:200;
   font-size:clamp(32px,7vw,96px);letter-spacing:0.12em;line-height:1;
   visibility:hidden;pointer-events:none;user-select:none;
-  white-space:nowrap;max-width:90vw;margin-bottom:20px;
+  white-space:nowrap;max-width:90vw;margin-bottom:44px;overflow:hidden;
 }
 
 .brand-rule{width:80%;height:1px;background:linear-gradient(to right,transparent,rgba(201,167,112,0.55),transparent);margin:0 0 13px;}
@@ -119,6 +113,7 @@ nav.scrolled{background:rgba(15,18,16,0.9);backdrop-filter:blur(14px);-webkit-ba
   font-family:'Cormorant Garamond',Georgia,serif;font-weight:600;
   font-size:clamp(28px,5.8vw,64px);letter-spacing:-0.015em;line-height:1;
   visibility:hidden;pointer-events:none;user-select:none;text-align:center;display:block;margin:0 auto;
+  overflow:hidden;
 }
 .section-subtitle{
   font-family:'Inter',-apple-system,sans-serif;font-size:13px;font-weight:300;
@@ -290,15 +285,9 @@ footer{
 
 <script>
 // ═══════════════════════════════════════════════════════════════════════
-// PURE TRANSFORM ANIMATION ENGINE
-//
-// The single rule that makes this work on mobile without glitching:
-//   #optellie-float and #approach-float have top:0, left:0 set ONCE.
-//   EVERYTHING else — vertical position, horizontal position, size —
-//   is expressed as transform:translate(x,y) scale(s).
-//
-// transform is GPU-composited. It never triggers layout. iOS scroll
-// events, address-bar resizes, and momentum scrolling cannot affect it.
+// TRANSFORM-ONLY ANIMATION ENGINE
+// Keeps the stable mobile method from the current file,
+// but restores the earlier animation feel.
 // ═══════════════════════════════════════════════════════════════════════
 
 const navEl      = document.getElementById('nav');
@@ -310,223 +299,225 @@ const appSpacer  = document.getElementById('approach-spacer');
 const heroEl     = document.getElementById('hero');
 const pillarsEl  = document.getElementById('approach');
 
-// ── Easing functions ─────────────────────────────────────────────────
-function lerp(a,b,t){return a+(b-a)*t;}
-function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
-function easeOutQuint(t){return 1-Math.pow(1-t,5);}
-function easeInOut(t){return t<0.5?2*t*t:-1+(4-2*t)*t;}
+// ── Helpers ───────────────────────────────────────────────────────────
+function lerp(a, b, t) { return a + (b - a) * t; }
+function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+function easeOutQuint(t) { return 1 - Math.pow(1 - t, 5); }
+function easeInOut(t) { return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t; }
+function isMob() { return window.innerWidth <= 768; }
 
-// ── Snapshot state (set once at init, never during scroll) ───────────
-const O = {}; // optellie state
-const A = {}; // approach state
+// ── State ─────────────────────────────────────────────────────────────
+const O = {};
+const A = {};
 
-function isMob(){ return window.innerWidth <= 768; }
-
-function init(){
+function init() {
   const mob = isMob();
   const vw  = window.innerWidth;
   const sy  = window.scrollY || 0;
 
-  // Nav destination
-  O.navLeft = mob ? 20  : 48;
-  O.navTop  = mob ? 18  : 20;
-  O.navFont = mob ? 16  : 20;
-  A.navFont = mob ? 16  : 20;
-  A.navTop  = mob ? 18  : 20;
+  // Nav targets
+  O.navLeft = mob ? 20 : 48;
+  O.navTop  = mob ? 18 : 20;
+  O.navFont = mob ? 16 : 20;
 
-  // ── Optellie: measure spacer ──────────────────────────────────────
-  const sr     = heroSpacer.getBoundingClientRect();
-  O.startFont  = parseFloat(window.getComputedStyle(heroSpacer).fontSize);
-  O.startTop   = sr.top + sy;          // absolute page Y (top of spacer)
-  O.startCX    = sr.left + sr.width/2; // viewport center X of spacer
+  A.navTop  = mob ? 18 : 20;
+  A.navFont = mob ? 16 : 20;
 
-  // Apply font size, measure width, then pin position
+  // ── Optellie snapshot ──────────────────────────────────────────────
+  const sr = heroSpacer.getBoundingClientRect();
+  O.startFont = parseFloat(window.getComputedStyle(heroSpacer).fontSize);
+  O.startAbsY = sr.top + sy;
+  O.startCX   = sr.left + sr.width / 2;
+
   optEl.style.fontSize = O.startFont + 'px';
   optEl.style.letterSpacing = '0.12em';
   optEl.style.gap = '0px';
-  O.halfW      = optEl.offsetWidth / 2;
-  O.scaleRatio = O.navFont / O.startFont;
 
-  // Pin: top:0, left:0 — forever. Transform does all positioning.
-  optEl.style.top  = '0';
+  const textSpan = optEl.querySelector('span');
+  O.textHalfW = textSpan.offsetWidth / 2;
+  O.iconW     = iconEl.offsetWidth;
+  O.scaleToNav = O.navFont / O.startFont;
+
+  optEl.style.top = '0';
   optEl.style.left = '0';
-  // Initial transform: center over spacer at full size
-  const initX = O.startCX - O.halfW;
-  const initY = O.startTop - sy; // viewport Y at scroll=0
-  optEl.style.transform = `translate(${initX}px,${initY}px) scale(1)`;
   optEl.style.opacity = '1';
 
-  // ── Our Approach: measure spacer ──────────────────────────────────
-  const ar     = appSpacer.getBoundingClientRect();
-  A.startFont  = parseFloat(window.getComputedStyle(appSpacer).fontSize);
-  A.startAbsY  = ar.top + sy;          // absolute page Y
-  A.startCX    = vw / 2;               // always centered
-  A.scaleRatio = A.navFont / A.startFont;
+  // ── Our approach snapshot ──────────────────────────────────────────
+  const ar = appSpacer.getBoundingClientRect();
+  A.startFont = parseFloat(window.getComputedStyle(appSpacer).fontSize);
+  A.startAbsY = ar.top + sy;
+  A.startCX   = vw / 2;
 
   appEl.style.fontSize = A.startFont + 'px';
   A.halfW = appEl.offsetWidth / 2;
+  A.scaleToNav = A.navFont / A.startFont;
 
-  // Pin: top:0, left:0
-  appEl.style.top  = '0';
+  appEl.style.top = '0';
   appEl.style.left = '0';
   appEl.style.opacity = '0';
 }
 
-// ── rAF loop — writes ONLY transform and opacity ─────────────────────
-function frame(){
+// ── Animation loop ───────────────────────────────────────────────────
+function frame() {
   requestAnimationFrame(frame);
 
   const sy = window.scrollY || 0;
   const vh = window.innerHeight;
   const heroH = heroEl.offsetHeight;
+  const mob = isMob();
 
-  // Nav backdrop
   navEl.classList.toggle('scrolled', sy > 40);
 
-  // ────────────────────────────────────────────────────────────────
+  // ═══════════════════════════════════════════════════════════════════
   // OPTELLIE
-  // Phase 1 (tA 0→0.35): shoot upward fast, shrink
-  // Phase 2 (tA 0.35→1): finish settling at nav top
-  // Phase B (pillars near top): sweep left to nav corner
-  // ────────────────────────────────────────────────────────────────
-  const tA  = clamp(sy / (heroH * 0.55), 0, 1);
-  const p1  = clamp(tA / 0.35, 0, 1);
-  const p1s = easeOutQuint(p1);                              // steep launch
-  const p2A = easeInOut(clamp((tA-0.35)/0.65, 0, 1));       // gentle settle
+  // Restore earlier feel:
+  // 1) quicker initial launch upward
+  // 2) gentle settle into nav top
+  // 3) sweep left later as approach section nears top
+  // Still fully transform-based for mobile stability
+  // ═══════════════════════════════════════════════════════════════════
+  const verticalSpan = Math.max(heroH * (mob ? 0.72 : 0.78), 1);
+  const tA = clamp(sy / verticalSpan, 0, 1);
 
-  // Y: from startAbsY (absolute) down to navTop (viewport)
-  // At scroll sy, startAbsY is at viewport position (startAbsY - sy)
-  const optNaturalViewY = O.startAbsY !== undefined
-    ? O.startAbsY - sy
-    : O.startTop - sy;
-  // Use stored startTop as absolute coord
-  const optAbsY   = O.startTop; // absolute page Y
-  const optStartViewY = optAbsY - sy; // viewport Y right now
+  const launchCut = 0.34;
+  const p1 = clamp(tA / launchCut, 0, 1);
+  const p2 = clamp((tA - launchCut) / (1 - launchCut), 0, 1);
 
-  // Target Y is navTop (viewport fixed)
-  // How much to move up from natural position: (optStartViewY - O.navTop)
-  const totalUp = optStartViewY - O.navTop;
-  // Phase 1 gets to 95% up, phase 2 finishes last 5%
-  let optDY;
-  if(p1s >= 1){
-    optDY = O.navTop; // locked
-  } else if(tA < 0.35){
-    optDY = lerp(optStartViewY, O.navTop + totalUp * 0.05, p1s);
+  const p1s = easeOutQuint(p1);
+  const p2s = easeInOut(p2);
+
+  const naturalOptY = O.startAbsY - sy;
+  const midOptY = O.navTop + (naturalOptY - O.navTop) * 0.08;
+
+  let optY;
+  if (tA < launchCut) {
+    optY = lerp(naturalOptY, midOptY, p1s);
   } else {
-    optDY = lerp(O.navTop + totalUp * 0.05, O.navTop, p2A);
+    optY = lerp(midOptY, O.navTop, p2s);
   }
 
-  // Scale: shrinks during phase 1 only, locked after
-  const optScale = lerp(1, O.scaleRatio, p1s);
+  const optScale = lerp(1, O.scaleToNav, p1s);
 
-  // X: Phase B — sweep from centered to nav left
   const pillarsViewTop = pillarsEl.getBoundingClientRect().top;
-  const bRaw = clamp((0 - pillarsViewTop) / (vh * 0.4), 0, 1);
-  const tB   = easeInOut(bRaw);
+  const sweepStart = mob ? vh * 0.22 : vh * 0.18;
+  const sweepRange = mob ? vh * 0.42 : vh * 0.35;
+  const bRaw = clamp((sweepStart - pillarsViewTop) / sweepRange, 0, 1);
+  const tB = easeInOut(bRaw);
 
-  // At tB=0: centered (startCX - halfW)
-  // At tB=1: nav left (navLeft)
-  const optStartX = O.startCX - O.halfW;
-  const optEndX   = O.navLeft;
-  const optDX     = lerp(optStartX, optEndX, tB);
+  const centeredX = O.startCX - (O.iconW + O.textHalfW) * optScale;
+  const optX = lerp(centeredX, O.navLeft, tB);
 
-  // Write single transform — no layout properties
-  optEl.style.transform = `translate(${optDX.toFixed(2)}px,${optDY.toFixed(2)}px) scale(${optScale.toFixed(4)})`;
-  optEl.style.letterSpacing = lerp(0.12, 0.22, tB) + 'em';
-  optEl.style.gap = lerp(0, 10, tB).toFixed(1) + 'px';
-  iconEl.style.opacity = (tB > 0.05 ? tB : 0).toFixed(3);
+  optEl.style.transform = `translate(${optX.toFixed(2)}px, ${optY.toFixed(2)}px) scale(${optScale.toFixed(4)})`;
+  optEl.style.letterSpacing = lerp(mob ? 0.08 : 0.12, mob ? 0.14 : 0.22, tB) + 'em';
+  optEl.style.gap = lerp(0, mob ? 8 : 10, tB).toFixed(1) + 'px';
+  iconEl.style.opacity = tB.toFixed(3);
 
   const settled = tB > 0.95;
   optEl.style.pointerEvents = settled ? 'all' : 'none';
   optEl.style.cursor = settled ? 'pointer' : 'default';
 
-  // ────────────────────────────────────────────────────────────────
+  // ═══════════════════════════════════════════════════════════════════
   // OUR APPROACH
-  // Starts at its natural page position (moves with page)
-  // Rises to navTop as section scrolls into view
-  // ────────────────────────────────────────────────────────────────
-  const appViewY   = A.startAbsY - sy;  // current viewport Y of element
-  const inView     = appViewY < vh * 0.98 && appViewY > -100;
+  // Timing referenced from earlier desktop behavior:
+  // stays lower longer, rises later, then settles at nav top
+  // Uses same general logic on mobile, just slightly compressed
+  // ═══════════════════════════════════════════════════════════════════
+  const appNaturalY = A.startAbsY - sy;
+  const pillarsRect = pillarsEl.getBoundingClientRect();
+  const sectionStillVisible = pillarsRect.bottom > 0;
 
-  if(inView){
-    // Fade in as it enters the bottom of the viewport
-    const fadeIn = clamp((vh * 0.88 - appViewY) / (vh * 0.18), 0, 1);
-    appEl.style.opacity = easeInOut(fadeIn).toFixed(3);
+  if (sectionStillVisible) {
+    const riseStart = mob ? vh * 0.38 : vh * 0.42;
+    const riseRange = mob ? vh * 0.56 : vh * 0.52;
+    const appRaw = clamp((riseStart - appNaturalY) / riseRange, 0, 1);
+    const appProg = easeInOut(appRaw);
 
-    // Rise: 0 when appViewY > 55% viewport, 1 when appViewY = navTop
-    const riseRaw = clamp(
-      (vh * 0.55 - appViewY) / (vh * 0.55 - A.navTop),
-      0, 1
-    );
-    const appProg = easeOutQuint(riseRaw);
+    const appY = lerp(appNaturalY, A.navTop, appProg);
+    const appScale = lerp(1, A.scaleToNav, appProg);
+    const appX = A.startCX - A.halfW * appScale;
 
-    // Y: natural viewport position → navTop
-    const appDY = lerp(appViewY, A.navTop, appProg);
+    const fadeIn = clamp((vh - appNaturalY) / (vh * (mob ? 0.26 : 0.22)), 0, 1);
+    const visible = appNaturalY < vh * 0.98 && pillarsRect.bottom > A.navTop;
 
-    // Scale: 1 → scaleRatio as it rises
-    const appScale = lerp(1, A.scaleRatio, appProg);
-
-    // X: always centered
-    const appDX = A.startCX - A.halfW;
-
-    appEl.style.transform = `translate(${appDX.toFixed(2)}px,${appDY.toFixed(2)}px) scale(${appScale.toFixed(4)})`;
+    appEl.style.opacity = visible ? easeInOut(fadeIn).toFixed(3) : '0';
+    appEl.style.transform = `translate(${appX.toFixed(2)}px, ${appY.toFixed(2)}px) scale(${appScale.toFixed(4)})`;
   } else {
     appEl.style.opacity = '0';
   }
 }
 
-// ── Pillar reveal ─────────────────────────────────────────────────────
-const revealObs = new IntersectionObserver(entries=>{
-  entries.forEach(e=>{
-    if(e.isIntersecting){e.target.classList.add('visible');revealObs.unobserve(e.target);}
+// ── Pillar reveal ────────────────────────────────────────────────────
+const revealObs = new IntersectionObserver((entries) => {
+  entries.forEach((e) => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      revealObs.unobserve(e.target);
+    }
   });
-},{threshold:0.2,rootMargin:'0px 0px -60px 0px'});
-document.querySelectorAll('[data-reveal]').forEach(el=>revealObs.observe(el));
+}, { threshold: 0.2, rootMargin: '0px 0px -60px 0px' });
 
-// ── Resize: re-init only on width change (ignores iOS address bar) ────
+document.querySelectorAll('[data-reveal]').forEach(el => revealObs.observe(el));
+
+// ── Resize handling ──────────────────────────────────────────────────
 let lastVW = window.innerWidth;
-window.addEventListener('resize',()=>{
+window.addEventListener('resize', () => {
   const vw = window.innerWidth;
-  if(Math.abs(vw - lastVW) > 10){
+  if (Math.abs(vw - lastVW) > 10) {
     lastVW = vw;
-    optEl.style.opacity = '0';
-    requestAnimationFrame(()=>requestAnimationFrame(()=>{ init(); }));
+    requestAnimationFrame(() => requestAnimationFrame(() => init()));
   }
-},{passive:true});
+}, { passive: true });
 
-// ── Boot ──────────────────────────────────────────────────────────────
-requestAnimationFrame(()=>requestAnimationFrame(()=>{
-  // Store as property we can reference
-  init();
-  // Store startTop as absolute page coord for use in frame()
-  O.startAbsY = O.startTop;
-  A.startAbsY = A.startAbsY; // already set in init
-  frame();
-  optEl.addEventListener('click',()=>{
-    if(optEl.style.pointerEvents==='all')
-      window.scrollTo({top:0,behavior:'smooth'});
+// ── Boot ─────────────────────────────────────────────────────────────
+requestAnimationFrame(() => {
+  requestAnimationFrame(() => {
+    init();
+    frame();
+
+    optEl.addEventListener('click', () => {
+      if (optEl.style.pointerEvents === 'all') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    });
   });
-}));
+});
 
-// ── Modal ─────────────────────────────────────────────────────────────
-function openModal(){
-  document.getElementById('modal-form').style.display='block';
-  document.getElementById('modal-success').style.display='none';
+// ── Modal ────────────────────────────────────────────────────────────
+function openModal() {
+  document.getElementById('modal-form').style.display = 'block';
+  document.getElementById('modal-success').style.display = 'none';
   document.getElementById('modal').classList.add('open');
 }
-function closeModal(){document.getElementById('modal').classList.remove('open');}
-function handleOverlayClick(e){if(e.target.id==='modal')closeModal();}
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
-function sendEmail(){
-  const name    = document.getElementById('modal-name').value.trim();
-  const email   = document.getElementById('modal-email').value.trim();
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+}
+
+function handleOverlayClick(e) {
+  if (e.target.id === 'modal') closeModal();
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+});
+
+function sendEmail() {
+  const name = document.getElementById('modal-name').value.trim();
+  const email = document.getElementById('modal-email').value.trim();
   const message = document.getElementById('modal-message').value.trim();
-  if(!name||!email||!message){alert('Please fill in all fields.');return;}
-  const subject = encodeURIComponent('Optellie — Inquiry from '+name);
-  const body    = encodeURIComponent('Name: '+name+'\nEmail: '+email+'\n\n'+message);
-  window.location.href='mailto:penpanthersam@gmail.com?subject='+subject+'&body='+body;
-  document.getElementById('modal-form').style.display='none';
-  document.getElementById('modal-success').style.display='block';
+
+  if (!name || !email || !message) {
+    alert('Please fill in all fields.');
+    return;
+  }
+
+  const subject = encodeURIComponent('Optellie — Inquiry from ' + name);
+  const body = encodeURIComponent('Name: ' + name + '\nEmail: ' + email + '\n\n' + message);
+
+  window.location.href = 'mailto:penpanthersam@gmail.com?subject=' + subject + '&body=' + body;
+
+  document.getElementById('modal-form').style.display = 'none';
+  document.getElementById('modal-success').style.display = 'block';
 }
 </script>
 </body>
