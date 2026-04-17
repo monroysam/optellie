@@ -27,12 +27,22 @@ nav{
 nav.scrolled{background:rgba(15,18,16,0.9);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);}
 .nav-right{pointer-events:all;}
 .nav-cta{
-  display:inline-block;background:transparent;color:var(--text);
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:0;background:transparent;color:var(--text);
   border:1px solid rgba(245,241,234,0.28);padding:10px 22px;
   font-size:11px;letter-spacing:0.18em;text-transform:uppercase;font-weight:400;
-  cursor:pointer;text-decoration:none;font-family:inherit;transition:border-color 0.3s,color 0.3s;
+  cursor:pointer;text-decoration:none;font-family:inherit;transition:border-color 0.3s,color 0.3s,transform 0.35s,padding 0.35s,min-width 0.35s,border-radius 0.35s,letter-spacing 0.35s,font-size 0.35s;
 }
 .nav-cta:hover{border-color:var(--gold);color:var(--gold);}
+.nav-cta.mobile-back{
+  min-width:40px;
+  padding:8px 0;
+  border-radius:999px;
+  letter-spacing:0;
+  font-size:18px;
+  line-height:1;
+  transform:translateY(0) scale(1.02);
+}
 
 /* ─── FLOAT ELEMENTS ──────────────────────────────────── */
 #optellie-float{
@@ -170,6 +180,7 @@ footer{
 @media(max-width:768px){
   nav{padding:16px 20px;}
   .nav-cta{padding:9px 14px;font-size:10px;letter-spacing:0.14em;}
+  .nav-cta.mobile-back{min-width:36px;padding:7px 0;font-size:17px;}
   #hero-spacer{font-size:clamp(28px,11vw,48px);margin-bottom:14px;}
   .hero{padding:0 24px;}
   .hero p{font-size:15px;max-width:100%;margin-bottom:28px;}
@@ -208,7 +219,7 @@ footer{
 
 <nav id="nav">
   <div class="nav-right">
-    <button class="nav-cta" onclick="openModal()">Get in touch</button>
+    <button class="nav-cta" id="nav-cta-top">Get in touch</button>
   </div>
 </nav>
 
@@ -290,6 +301,7 @@ footer{
 
 <script>
 const navEl      = document.getElementById('nav');
+const navCtaTop  = document.getElementById('nav-cta-top');
 const optEl      = document.getElementById('optellie-float');
 const iconEl     = document.getElementById('float-icon');
 const appEl      = document.getElementById('approach-float');
@@ -306,6 +318,15 @@ function isMob(){ return window.innerWidth <= 768; }
 
 const O = {};
 const A = {};
+let animationStarted = false;
+let resizeTimer = null;
+let rafRunning = false;
+
+function updateMobileNavCta() {
+  const shouldBack = isMob() && window.scrollY > 18;
+  navCtaTop.classList.toggle('mobile-back', shouldBack);
+  navCtaTop.textContent = shouldBack ? '⌃' : 'Get in touch';
+}
 
 function init(){
   const mob = isMob();
@@ -319,7 +340,8 @@ function init(){
   O.startLS   = 0.12;
   O.navLS     = mob ? 0.14 : 0.18;
 
-  A.navFont   = mob ? 16 : 20;
+  // 40% bigger banner size for Our approach
+  A.navFont   = mob ? 22 : 28;
   A.navTop    = mob ? 18 : 20;
 
   const sr = heroSpacer.getBoundingClientRect();
@@ -357,10 +379,14 @@ function init(){
   appEl.style.top = '0';
   appEl.style.left = '0';
   appEl.style.opacity = '0';
+
+  animationStarted = true;
+  updateMobileNavCta();
 }
 
 function frame(){
   requestAnimationFrame(frame);
+  if (!animationStarted) return;
 
   const sy = window.scrollY || 0;
   const vh = window.innerHeight;
@@ -368,8 +394,9 @@ function frame(){
   const mob = isMob();
 
   navEl.classList.toggle('scrolled', sy > 40);
+  updateMobileNavCta();
 
-  // ── OUR APPROACH (unchanged animation) ───────────────────────────
+  // ── OUR APPROACH ───────────────────────────────────────────────
   const appNaturalY = A.startAbsY - sy;
   const pillarsRect = pillarsEl.getBoundingClientRect();
   const sectionStillVisible = pillarsRect.bottom > A.navTop;
@@ -397,7 +424,7 @@ function frame(){
     appProg = 0;
   }
 
-  // ── OPTELLIE (unchanged animation) ────────────────────────────────
+  // ── OPTELLIE ────────────────────────────────────────────────────
   const tA  = clamp(sy / (heroH * 0.55), 0, 1);
   const p1  = clamp(tA / 0.35, 0, 1);
   const p1s = easeOutQuint(p1);
@@ -411,7 +438,6 @@ function frame(){
   const gapNow  = lerp(0, O.navGap, appProg);
   const lsNow   = lerp(O.startLS, O.navLS, appProg);
 
-  // Recenter from the actual original half-width on large screens
   const currentHalfW = ((O.startHalfW * 2) + iconNow + gapNow) * optScale / 2;
   const centeredX    = O.startCX - currentHalfW;
   const optX         = lerp(centeredX, O.navLeft, appProg);
@@ -438,16 +464,20 @@ const revealObs = new IntersectionObserver(entries=>{
 },{threshold:0.2,rootMargin:'0px 0px -60px 0px'});
 document.querySelectorAll('[data-reveal]').forEach(el=>revealObs.observe(el));
 
-let lastVW = window.innerWidth;
-window.addEventListener('resize',()=>{
-  const vw = window.innerWidth;
-  if(Math.abs(vw - lastVW) > 10){
-    lastVW = vw;
-    requestAnimationFrame(()=>requestAnimationFrame(()=>{ init(); }));
-  }
-},{passive:true});
+function scheduleInit(){
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    requestAnimationFrame(() => requestAnimationFrame(() => init()));
+  }, 80);
+}
+
+window.addEventListener('resize', scheduleInit, {passive:true});
+window.addEventListener('orientationchange', scheduleInit, {passive:true});
+window.addEventListener('pageshow', scheduleInit, {passive:true});
 
 function boot(){
+  if (rafRunning) return;
+  rafRunning = true;
   init();
   frame();
   optEl.addEventListener('click',()=>{
@@ -456,6 +486,14 @@ function boot(){
     }
   });
 }
+
+navCtaTop.addEventListener('click', () => {
+  if (isMob() && window.scrollY > 18) {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } else {
+    openModal();
+  }
+});
 
 if (document.fonts && document.fonts.ready) {
   document.fonts.ready.then(() => {
