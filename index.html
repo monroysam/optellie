@@ -213,7 +213,7 @@ footer{
   .scroll-hint{bottom:20px;font-size:10px;}
   .pillars{padding:72px 20px 100px;}
   #approach-spacer{font-size:clamp(24px,9vw,40px);}
-  .section-subtitle{font-size:11px;letter-spacing:0.12em;margin-top:14px;margin-bottom:44px;}
+  .section-subtitle{font-size:11px;letter-spacing:0.12em;margin-top:28px;margin-bottom:44px;}
   .pillar{grid-template-columns:1fr;gap:12px;padding:32px 0;}
   .pillar-number{font-size:40px;}
   .pillar-label{font-size:12px;letter-spacing:0.14em;margin-bottom:10px;}
@@ -364,7 +364,7 @@ function init(){
 
   // 40% bigger banner size for Our approach
   A.navFont   = mob ? 30 : 28;
-  A.navTop    = mob ? (O.navTop - (A.navFont - O.navFont) * 0.08) : 20;
+  A.navTop    = mob ? 18 : 20;
 
   // --- OPTELLIE snapshot ---
   const sr = heroSpacer.getBoundingClientRect();
@@ -385,7 +385,9 @@ function init(){
 
   // Measure text only for mobile stable method, full width for desktop current method.
   const textSpan = optEl.querySelector('span');
-  O.textHalfW = textSpan.getBoundingClientRect().width / 2;
+  const textRect = textSpan.getBoundingClientRect();
+  O.textHalfW = textRect.width / 2;
+  O.textHeightRatio = textRect.height / O.startFont;
   O.iconW = O.navIcon;
   const fullW = optEl.getBoundingClientRect().width;
   O.startHalfW = fullW / 2;
@@ -405,7 +407,16 @@ function init(){
   appEl.style.top = '0';
   appEl.style.left = '0';
   appEl.style.fontSize = A.startFont + 'px';
-  A.halfW = appEl.getBoundingClientRect().width / 2;
+  const appRect = appEl.getBoundingClientRect();
+  A.halfW = appRect.width / 2;
+  A.heightRatio = appRect.height / A.startFont;
+  if (mob) {
+    const appFinalH = A.navFont * A.heightRatio;
+    const optFinalH = O.navFont * O.textHeightRatio;
+    O.mobileAlignedTop = A.navTop + (appFinalH - optFinalH) / 2;
+  } else {
+    O.mobileAlignedTop = O.navTop;
+  }
   appEl.style.opacity = '0';
 
   animationStarted = true;
@@ -458,15 +469,16 @@ function frame(){
     const p1s = easeOutQuint(p1);
     const p2A = easeInOut(clamp((tA - 0.35) / 0.65, 0, 1));
 
+    const optTargetTop = O.mobileAlignedTop;
     const optStartViewY = O.startTop - sy;
-    const totalUp = optStartViewY - O.navTop;
+    const totalUp = optStartViewY - optTargetTop;
     let optY;
     if (p1s >= 1) {
-      optY = O.navTop;
+      optY = optTargetTop;
     } else if (tA < 0.35) {
-      optY = lerp(optStartViewY, O.navTop + totalUp * 0.05, p1s);
+      optY = lerp(optStartViewY, optTargetTop + totalUp * 0.05, p1s);
     } else {
-      optY = lerp(O.navTop + totalUp * 0.05, O.navTop, p2A);
+      optY = lerp(optTargetTop + totalUp * 0.05, optTargetTop, p2A);
     }
 
     const optScale = lerp(1, O.scaleToNav, p1s);
