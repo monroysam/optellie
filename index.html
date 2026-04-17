@@ -319,8 +319,8 @@ function isMob(){ return window.innerWidth <= 768; }
 const O = {};
 const A = {};
 let animationStarted = false;
-let resizeTimer = null;
 let rafRunning = false;
+let lastVW = window.innerWidth;
 
 function updateMobileNavCta() {
   const shouldBack = isMob() && window.scrollY > 18;
@@ -331,6 +331,7 @@ function updateMobileNavCta() {
 function init(){
   const mob = isMob();
   const sy  = window.scrollY || 0;
+  const vw  = window.innerWidth;
 
   O.navLeft   = mob ? 20 : 48;
   O.navTop    = mob ? 18 : 20;
@@ -344,10 +345,12 @@ function init(){
   A.navFont   = mob ? 22 : 28;
   A.navTop    = mob ? 18 : 20;
 
+  // --- OPTELLIE snapshot ---
   const sr = heroSpacer.getBoundingClientRect();
-  O.startFont = parseFloat(window.getComputedStyle(heroSpacer).fontSize);
-  O.startAbsY = sr.top + sy;
-  O.startCX   = sr.left + sr.width / 2;
+  O.startFont  = parseFloat(window.getComputedStyle(heroSpacer).fontSize);
+  O.startAbsY  = sr.top + sy;
+  O.startTop   = O.startAbsY;
+  O.startCX    = sr.left + sr.width / 2;
   O.scaleToNav = O.navFont / O.startFont;
 
   optEl.style.top = '0';
@@ -359,25 +362,29 @@ function init(){
   iconEl.style.height = '0px';
   iconEl.style.opacity = '0';
 
-  const optW = optEl.getBoundingClientRect().width;
-  O.startHalfW = optW / 2;
+  // Measure text only for mobile stable method, full width for desktop current method.
+  const textSpan = optEl.querySelector('span');
+  O.textHalfW = textSpan.getBoundingClientRect().width / 2;
+  O.iconW = O.navIcon;
+  const fullW = optEl.getBoundingClientRect().width;
+  O.startHalfW = fullW / 2;
 
-  const initX = O.startCX - O.startHalfW;
+  const initX = mob ? (O.startCX - O.textHalfW) : (O.startCX - O.startHalfW);
   const initY = O.startAbsY - sy;
   optEl.style.transform = `translate(${initX}px,${initY}px) scale(1)`;
   optEl.style.opacity = '1';
 
+  // --- OUR APPROACH snapshot ---
   const ar = appSpacer.getBoundingClientRect();
-  A.startFont = parseFloat(window.getComputedStyle(appSpacer).fontSize);
-  A.startAbsY = ar.top + sy;
-  A.startCX   = ar.left + ar.width / 2;
+  A.startFont  = parseFloat(window.getComputedStyle(appSpacer).fontSize);
+  A.startAbsY  = ar.top + sy;
+  A.startCX    = mob ? (vw / 2) : (ar.left + ar.width / 2);
   A.scaleRatio = A.navFont / A.startFont;
-
-  appEl.style.fontSize = A.startFont + 'px';
-  A.halfW = appEl.getBoundingClientRect().width / 2;
 
   appEl.style.top = '0';
   appEl.style.left = '0';
+  appEl.style.fontSize = A.startFont + 'px';
+  A.halfW = appEl.getBoundingClientRect().width / 2;
   appEl.style.opacity = '0';
 
   animationStarted = true;
@@ -396,16 +403,79 @@ function frame(){
   navEl.classList.toggle('scrolled', sy > 40);
   updateMobileNavCta();
 
-  // ── OUR APPROACH ───────────────────────────────────────────────
+  let appProg = 0;
+
+  if (mob) {
+    // ── MOBILE: revert to older stable pure-transform method ──────────
+    // OUR APPROACH
+    const appViewY = A.startAbsY - sy;
+    const pillarsBottom = pillarsEl.getBoundingClientRect().bottom;
+    const inView = appViewY < vh * 0.95 && pillarsBottom > 0;
+
+    if (inView) {
+      const fadeIn = clamp((vh * 0.85 - appViewY) / (vh * 0.15), 0, 1);
+      appEl.style.opacity = easeInOut(fadeIn).toFixed(3);
+
+      const riseRaw = clamp((vh * 0.30 - appViewY) / (vh * 0.30 - A.navTop), 0, 1);
+      appProg = easeOutQuint(riseRaw);
+
+      const appNatural = Math.max(appViewY, A.navTop);
+      const appY = lerp(appNatural, A.navTop, appProg);
+      const appScale = lerp(1, A.scaleRatio, appProg);
+      const appX = A.startCX - A.halfW * appScale;
+
+      appEl.style.transform = `translate(${appX.toFixed(2)}px,${appY.toFixed(2)}px) scale(${appScale.toFixed(4)})`;
+    } else {
+      appEl.style.opacity = '0';
+      appProg = 0;
+    }
+
+    // OPTELLIE
+    const tA  = clamp(sy / (heroH * 0.55), 0, 1);
+    const p1  = clamp(tA / 0.35, 0, 1);
+    const p1s = easeOutQuint(p1);
+    const p2A = easeInOut(clamp((tA - 0.35) / 0.65, 0, 1));
+
+    const optStartViewY = O.startTop - sy;
+    const totalUp = optStartViewY - O.navTop;
+    let optY;
+    if (p1s >= 1) {
+      optY = O.navTop;
+    } else if (tA < 0.35) {
+      optY = lerp(optStartViewY, O.navTop + totalUp * 0.05, p1s);
+    } else {
+      optY = lerp(O.navTop + totalUp * 0.05, O.navTop, p2A);
+    }
+
+    const optScale = lerp(1, O.scaleToNav, p1s);
+    const pillarsViewTop = pillarsEl.getBoundingClientRect().top;
+    const bRaw = clamp((vh * 0.5 - pillarsViewTop) / (vh * 0.5), 0, 1);
+    const tB = easeInOut(bRaw);
+
+    const centeredX = O.startCX - O.textHalfW * optScale;
+    const optX = lerp(centeredX, O.navLeft, tB);
+
+    optEl.style.transform = `translate(${optX.toFixed(2)}px,${optY.toFixed(2)}px) scale(${optScale.toFixed(4)})`;
+    optEl.style.letterSpacing = lerp(0.12, 0.14, tB).toFixed(3) + 'em';
+    optEl.style.gap = lerp(0, O.navGap, tB).toFixed(1) + 'px';
+    iconEl.style.width = lerp(0, O.navIcon, tB).toFixed(1) + 'px';
+    iconEl.style.height = lerp(0, O.navIcon, tB).toFixed(1) + 'px';
+    iconEl.style.opacity = (tB > 0.05 ? tB : 0).toFixed(3);
+
+    const settled = tB > 0.95;
+    optEl.style.pointerEvents = settled ? 'all' : 'none';
+    optEl.style.cursor = settled ? 'pointer' : 'default';
+    return;
+  }
+
+  // ── DESKTOP: keep exactly as working version ───────────────────────
   const appNaturalY = A.startAbsY - sy;
   const pillarsRect = pillarsEl.getBoundingClientRect();
   const sectionStillVisible = pillarsRect.bottom > A.navTop;
 
-  let appProg = 0;
-
   if (sectionStillVisible) {
-    const riseStart = mob ? vh * 0.14 : vh * 0.10;
-    const riseRange = mob ? vh * 0.20 : vh * 0.18;
+    const riseStart = vh * 0.10;
+    const riseRange = vh * 0.18;
     const appRaw    = clamp((riseStart - appNaturalY) / riseRange, 0, 1);
     appProg         = easeInOut(appRaw);
 
@@ -424,7 +494,6 @@ function frame(){
     appProg = 0;
   }
 
-  // ── OPTELLIE ────────────────────────────────────────────────────
   const tA  = clamp(sy / (heroH * 0.55), 0, 1);
   const p1  = clamp(tA / 0.35, 0, 1);
   const p1s = easeOutQuint(p1);
@@ -464,16 +533,20 @@ const revealObs = new IntersectionObserver(entries=>{
 },{threshold:0.2,rootMargin:'0px 0px -60px 0px'});
 document.querySelectorAll('[data-reveal]').forEach(el=>revealObs.observe(el));
 
-function scheduleInit(){
-  clearTimeout(resizeTimer);
-  resizeTimer = setTimeout(() => {
-    requestAnimationFrame(() => requestAnimationFrame(() => init()));
-  }, 80);
-}
-
-window.addEventListener('resize', scheduleInit, {passive:true});
-window.addEventListener('orientationchange', scheduleInit, {passive:true});
-window.addEventListener('pageshow', scheduleInit, {passive:true});
+window.addEventListener('resize',()=>{
+  const vw = window.innerWidth;
+  // mobile: ignore address-bar height churn; re-init only on real width change
+  if (Math.abs(vw - lastVW) > 10){
+    lastVW = vw;
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{ init(); }));
+  }
+},{passive:true});
+window.addEventListener('orientationchange',()=>{
+  setTimeout(()=>requestAnimationFrame(()=>requestAnimationFrame(()=>{ lastVW = window.innerWidth; init(); })), 120);
+},{passive:true});
+window.addEventListener('pageshow',()=>{
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{ lastVW = window.innerWidth; init(); }));
+},{passive:true});
 
 function boot(){
   if (rafRunning) return;
