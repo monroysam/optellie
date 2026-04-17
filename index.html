@@ -45,7 +45,13 @@ nav.scrolled{background:rgba(15,18,16,0.9);backdrop-filter:blur(14px);-webkit-ba
   will-change:transform,opacity;
   -webkit-font-smoothing:antialiased;
 }
-#float-icon{flex-shrink:0;width:18px;height:18px;opacity:0;}
+#float-icon{
+  flex-shrink:0;
+  width:0;
+  height:0;
+  opacity:0;
+  overflow:visible;
+}
 
 #approach-float{
   position:fixed;top:0;left:0;z-index:190;
@@ -75,7 +81,6 @@ nav.scrolled{background:rgba(15,18,16,0.9);backdrop-filter:blur(14px);-webkit-ba
 .hero-vignette{position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 28%,rgba(0,0,0,0.68) 100%);}
 .hero-content{position:relative;z-index:2;max-width:860px;display:flex;flex-direction:column;align-items:center;}
 
-/* Invisible spacer — holds the space optellie visually occupies */
 #hero-spacer{
   font-family:'Inter',-apple-system,sans-serif;font-weight:200;
   font-size:clamp(32px,7vw,96px);letter-spacing:0.12em;line-height:1;
@@ -284,16 +289,6 @@ footer{
 </div>
 
 <script>
-// ═══════════════════════════════════════════════════════════════════════
-// TRANSFORM-ONLY ANIMATION ENGINE
-// Keeps the current stable mobile method.
-// Fixes:
-// 1) Desktop OPTELLIE goes straight up, then left later
-// 2) Our approach moves much later
-// 3) Our approach does not disappear near page end
-// 4) Mobile keeps same method and stops getting buggy
-// ═══════════════════════════════════════════════════════════════════════
-
 const navEl      = document.getElementById('nav');
 const optEl      = document.getElementById('optellie-float');
 const iconEl     = document.getElementById('float-icon');
@@ -303,66 +298,68 @@ const appSpacer  = document.getElementById('approach-spacer');
 const heroEl     = document.getElementById('hero');
 const pillarsEl  = document.getElementById('approach');
 
-// ── Helpers ───────────────────────────────────────────────────────────
-function lerp(a, b, t) { return a + (b - a) * t; }
-function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
-function easeOutQuint(t) { return 1 - Math.pow(1 - t, 5); }
-function easeInOut(t) { return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t; }
-function isMob() { return window.innerWidth <= 768; }
+function lerp(a,b,t){return a+(b-a)*t;}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+function easeOutQuint(t){return 1-Math.pow(1-t,5);}
+function easeInOut(t){return t<0.5?2*t*t:-1+(4-2*t)*t;}
+function isMob(){ return window.innerWidth <= 768; }
 
-// ── State ─────────────────────────────────────────────────────────────
 const O = {};
 const A = {};
 
-function init() {
+function init(){
   const mob = isMob();
-  const vw  = window.innerWidth;
   const sy  = window.scrollY || 0;
 
-  // Nav targets
-  O.navLeft = mob ? 20 : 48;
-  O.navTop  = mob ? 18 : 20;
-  O.navFont = mob ? 16 : 20;
+  O.navLeft   = mob ? 20 : 48;
+  O.navTop    = mob ? 18 : 20;
+  O.navFont   = mob ? 16 : 20;
+  O.navIcon   = mob ? 14 : 18;
+  O.navGap    = mob ? 8 : 10;
+  O.startLS   = 0.12;
+  O.navLS     = mob ? 0.14 : 0.18;
 
-  A.navTop  = mob ? 18 : 20;
-  A.navFont = mob ? 16 : 20;
+  A.navFont   = mob ? 16 : 20;
+  A.navTop    = mob ? 18 : 20;
 
-  // ── Optellie snapshot ──────────────────────────────────────────────
   const sr = heroSpacer.getBoundingClientRect();
   O.startFont = parseFloat(window.getComputedStyle(heroSpacer).fontSize);
   O.startAbsY = sr.top + sy;
   O.startCX   = sr.left + sr.width / 2;
-
-  optEl.style.fontSize = O.startFont + 'px';
-  optEl.style.letterSpacing = '0.12em';
-  optEl.style.gap = '0px';
-
-  const textSpan = optEl.querySelector('span');
-  O.textHalfW = textSpan.offsetWidth / 2;
-  O.iconW     = iconEl.offsetWidth;
   O.scaleToNav = O.navFont / O.startFont;
 
   optEl.style.top = '0';
   optEl.style.left = '0';
+  optEl.style.fontSize = O.startFont + 'px';
+  optEl.style.letterSpacing = O.startLS + 'em';
+  optEl.style.gap = '0px';
+  iconEl.style.width = '0px';
+  iconEl.style.height = '0px';
+  iconEl.style.opacity = '0';
+
+  const optW = optEl.getBoundingClientRect().width;
+  O.startHalfW = optW / 2;
+
+  const initX = O.startCX - O.startHalfW;
+  const initY = O.startAbsY - sy;
+  optEl.style.transform = `translate(${initX}px,${initY}px) scale(1)`;
   optEl.style.opacity = '1';
 
-  // ── Our approach snapshot ──────────────────────────────────────────
   const ar = appSpacer.getBoundingClientRect();
   A.startFont = parseFloat(window.getComputedStyle(appSpacer).fontSize);
   A.startAbsY = ar.top + sy;
-  A.startCX   = vw / 2;
+  A.startCX   = ar.left + ar.width / 2;
+  A.scaleRatio = A.navFont / A.startFont;
 
   appEl.style.fontSize = A.startFont + 'px';
-  A.halfW = appEl.offsetWidth / 2;
-  A.scaleToNav = A.navFont / A.startFont;
+  A.halfW = appEl.getBoundingClientRect().width / 2;
 
   appEl.style.top = '0';
   appEl.style.left = '0';
   appEl.style.opacity = '0';
 }
 
-// ── Animation loop ───────────────────────────────────────────────────
-function frame() {
+function frame(){
   requestAnimationFrame(frame);
 
   const sy = window.scrollY || 0;
@@ -372,46 +369,21 @@ function frame() {
 
   navEl.classList.toggle('scrolled', sy > 40);
 
-  // OPTELLIE: straight up first, then left later
-  const verticalSpan = Math.max(heroH * (mob ? 0.82 : 0.88), 1);
-  const verticalRaw  = clamp(sy / verticalSpan, 0, 1);
-  const verticalT    = easeInOut(verticalRaw);
-
-  const naturalOptY = O.startAbsY - sy;
-  const optY        = lerp(naturalOptY, O.navTop, verticalT);
-  const optScale    = lerp(1, O.scaleToNav, verticalT);
-
-  const pillarsViewTop = pillarsEl.getBoundingClientRect().top;
-  const sweepStart = mob ? vh * 0.08 : vh * 0.02;
-  const sweepRange = mob ? vh * 0.24 : vh * 0.22;
-  const bRaw = clamp((sweepStart - pillarsViewTop) / sweepRange, 0, 1);
-  const tB   = easeInOut(bRaw);
-
-  const centeredX = O.startCX - (O.iconW + O.textHalfW) * optScale;
-  const optX      = lerp(centeredX, O.navLeft, tB);
-
-  optEl.style.transform = `translate(${optX.toFixed(2)}px, ${optY.toFixed(2)}px) scale(${optScale.toFixed(4)})`;
-  optEl.style.letterSpacing = lerp(mob ? 0.08 : 0.12, mob ? 0.14 : 0.22, tB) + 'em';
-  optEl.style.gap = lerp(0, mob ? 8 : 10, tB).toFixed(1) + 'px';
-  iconEl.style.opacity = tB.toFixed(3);
-
-  const settled = tB > 0.95;
-  optEl.style.pointerEvents = settled ? 'all' : 'none';
-  optEl.style.cursor = settled ? 'pointer' : 'default';
-
-  // OUR APPROACH: much later, never disappears while section visible
+  // ── OUR APPROACH (unchanged animation) ───────────────────────────
   const appNaturalY = A.startAbsY - sy;
   const pillarsRect = pillarsEl.getBoundingClientRect();
   const sectionStillVisible = pillarsRect.bottom > A.navTop;
+
+  let appProg = 0;
 
   if (sectionStillVisible) {
     const riseStart = mob ? vh * 0.14 : vh * 0.10;
     const riseRange = mob ? vh * 0.20 : vh * 0.18;
     const appRaw    = clamp((riseStart - appNaturalY) / riseRange, 0, 1);
-    const appProg   = easeInOut(appRaw);
+    appProg         = easeInOut(appRaw);
 
     const appY      = lerp(appNaturalY, A.navTop, appProg);
-    const appScale  = lerp(1, A.scaleToNav, appProg);
+    const appScale  = lerp(1, A.scaleRatio, appProg);
     const appX      = A.startCX - A.halfW * appScale;
 
     const fadeInRaw = clamp((vh * 0.92 - appNaturalY) / (vh * 0.16), 0, 1);
@@ -419,84 +391,98 @@ function frame() {
     const baseOpacity = Math.max(fadeIn, appProg > 0 ? 1 : fadeIn);
 
     appEl.style.opacity = baseOpacity.toFixed(3);
-    appEl.style.transform = `translate(${appX.toFixed(2)}px, ${appY.toFixed(2)}px) scale(${appScale.toFixed(4)})`;
+    appEl.style.transform = `translate(${appX.toFixed(2)}px,${appY.toFixed(2)}px) scale(${appScale.toFixed(4)})`;
   } else {
     appEl.style.opacity = '0';
+    appProg = 0;
   }
+
+  // ── OPTELLIE (unchanged animation) ────────────────────────────────
+  const tA  = clamp(sy / (heroH * 0.55), 0, 1);
+  const p1  = clamp(tA / 0.35, 0, 1);
+  const p1s = easeOutQuint(p1);
+
+  const naturalOptY = O.startAbsY - sy;
+  const midY        = O.navTop + (naturalOptY - O.navTop) * 0.05;
+  const optY        = p1s >= 1 ? O.navTop : lerp(naturalOptY, midY, p1s);
+  const optScale    = lerp(1, O.scaleToNav, p1s);
+
+  const iconNow = lerp(0, O.navIcon, appProg);
+  const gapNow  = lerp(0, O.navGap, appProg);
+  const lsNow   = lerp(O.startLS, O.navLS, appProg);
+
+  // Recenter from the actual original half-width on large screens
+  const currentHalfW = ((O.startHalfW * 2) + iconNow + gapNow) * optScale / 2;
+  const centeredX    = O.startCX - currentHalfW;
+  const optX         = lerp(centeredX, O.navLeft, appProg);
+
+  optEl.style.transform = `translate(${optX.toFixed(2)}px,${optY.toFixed(2)}px) scale(${optScale.toFixed(4)})`;
+  optEl.style.letterSpacing = lsNow.toFixed(3) + 'em';
+  optEl.style.gap = gapNow.toFixed(1) + 'px';
+  iconEl.style.width = iconNow.toFixed(1) + 'px';
+  iconEl.style.height = iconNow.toFixed(1) + 'px';
+  iconEl.style.opacity = appProg.toFixed(3);
+
+  const settled = appProg > 0.95;
+  optEl.style.pointerEvents = settled ? 'all' : 'none';
+  optEl.style.cursor = settled ? 'pointer' : 'default';
 }
 
-// ── Pillar reveal ────────────────────────────────────────────────────
-const revealObs = new IntersectionObserver((entries) => {
-  entries.forEach((e) => {
-    if (e.isIntersecting) {
+const revealObs = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
       e.target.classList.add('visible');
       revealObs.unobserve(e.target);
     }
   });
-}, { threshold: 0.2, rootMargin: '0px 0px -60px 0px' });
+},{threshold:0.2,rootMargin:'0px 0px -60px 0px'});
+document.querySelectorAll('[data-reveal]').forEach(el=>revealObs.observe(el));
 
-document.querySelectorAll('[data-reveal]').forEach(el => revealObs.observe(el));
-
-// ── Resize handling ──────────────────────────────────────────────────
 let lastVW = window.innerWidth;
-window.addEventListener('resize', () => {
+window.addEventListener('resize',()=>{
   const vw = window.innerWidth;
-  if (Math.abs(vw - lastVW) > 10) {
+  if(Math.abs(vw - lastVW) > 10){
     lastVW = vw;
-    requestAnimationFrame(() => requestAnimationFrame(() => init()));
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{ init(); }));
   }
-}, { passive: true });
+},{passive:true});
 
-// ── Boot ─────────────────────────────────────────────────────────────
-requestAnimationFrame(() => {
-  requestAnimationFrame(() => {
-    init();
-    frame();
-
-    optEl.addEventListener('click', () => {
-      if (optEl.style.pointerEvents === 'all') {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-    });
+function boot(){
+  init();
+  frame();
+  optEl.addEventListener('click',()=>{
+    if(optEl.style.pointerEvents==='all'){
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
   });
-});
+}
 
-// ── Modal ────────────────────────────────────────────────────────────
-function openModal() {
-  document.getElementById('modal-form').style.display = 'block';
-  document.getElementById('modal-success').style.display = 'none';
+if (document.fonts && document.fonts.ready) {
+  document.fonts.ready.then(() => {
+    requestAnimationFrame(()=>requestAnimationFrame(boot));
+  });
+} else {
+  requestAnimationFrame(()=>requestAnimationFrame(boot));
+}
+
+function openModal(){
+  document.getElementById('modal-form').style.display='block';
+  document.getElementById('modal-success').style.display='none';
   document.getElementById('modal').classList.add('open');
 }
-
-function closeModal() {
-  document.getElementById('modal').classList.remove('open');
-}
-
-function handleOverlayClick(e) {
-  if (e.target.id === 'modal') closeModal();
-}
-
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') closeModal();
-});
-
-function sendEmail() {
-  const name = document.getElementById('modal-name').value.trim();
-  const email = document.getElementById('modal-email').value.trim();
+function closeModal(){document.getElementById('modal').classList.remove('open');}
+function handleOverlayClick(e){if(e.target.id==='modal')closeModal();}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+function sendEmail(){
+  const name    = document.getElementById('modal-name').value.trim();
+  const email   = document.getElementById('modal-email').value.trim();
   const message = document.getElementById('modal-message').value.trim();
-
-  if (!name || !email || !message) {
-    alert('Please fill in all fields.');
-    return;
-  }
-
-  const subject = encodeURIComponent('Optellie — Inquiry from ' + name);
-  const body = encodeURIComponent('Name: ' + name + '\nEmail: ' + email + '\n\n' + message);
-
-  window.location.href = 'mailto:penpanthersam@gmail.com?subject=' + subject + '&body=' + body;
-
-  document.getElementById('modal-form').style.display = 'none';
-  document.getElementById('modal-success').style.display = 'block';
+  if(!name||!email||!message){alert('Please fill in all fields.');return;}
+  const subject = encodeURIComponent('Optellie — Inquiry from '+name);
+  const body    = encodeURIComponent('Name: '+name+'\nEmail: '+email+'\n\n'+message);
+  window.location.href='mailto:penpanthersam@gmail.com?subject='+subject+'&body='+body;
+  document.getElementById('modal-form').style.display='none';
+  document.getElementById('modal-success').style.display='block';
 }
 </script>
 </body>
