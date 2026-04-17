@@ -9,9 +9,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-
+ 
   html { scroll-behavior: smooth; }
-
+ 
   body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     background: #0F1210;
@@ -20,9 +20,9 @@
     font-weight: 300;
     overflow-x: hidden;
   }
-
+ 
   .serif { font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 400; }
-
+ 
   /* ---------- Top nav ---------- */
   nav {
     position: fixed;
@@ -37,13 +37,13 @@
     background: rgba(15, 18, 16, 0);
     transition: background 0.4s ease, backdrop-filter 0.4s ease;
   }
-
+ 
   nav.scrolled {
     background: rgba(15, 18, 16, 0.85);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
   }
-
+ 
   .logo {
     display: flex;
     align-items: center;
@@ -53,9 +53,9 @@
     text-transform: uppercase;
     color: #F5F1EA;
   }
-
+ 
   .logo svg { display: block; }
-
+ 
   /* ---------- Hero ---------- */
   .hero {
     position: relative;
@@ -65,7 +65,7 @@
     padding: 0 48px;
     overflow: hidden;
   }
-
+ 
   .hero-bg {
     position: absolute;
     inset: 0;
@@ -78,19 +78,19 @@
     /* NOTE: Replace this gradient with a real image in Squarespace:
        background: url('your-aerial-river-photo.jpg') center/cover no-repeat; */
   }
-
+ 
   .hero-vignette {
     position: absolute;
     inset: 0;
     background: radial-gradient(ellipse at center, transparent 35%, rgba(0, 0, 0, 0.6) 100%);
   }
-
+ 
   .hero-content {
     position: relative;
     z-index: 2;
     max-width: 780px;
   }
-
+ 
   .eyebrow {
     font-size: 11px;
     letter-spacing: 0.3em;
@@ -98,7 +98,7 @@
     color: rgba(245, 241, 234, 0.55);
     margin-bottom: 28px;
   }
-
+ 
   h1 {
     font-family: 'Cormorant Garamond', Georgia, serif;
     font-size: clamp(42px, 6.5vw, 72px);
@@ -108,7 +108,7 @@
     margin-bottom: 28px;
     color: #F5F1EA;
   }
-
+ 
   .hero p {
     font-size: 17px;
     line-height: 1.65;
@@ -117,7 +117,7 @@
     margin-bottom: 44px;
     font-weight: 300;
   }
-
+ 
   .cta {
     display: inline-block;
     background: #F5F1EA;
@@ -133,9 +133,9 @@
     transition: background 0.3s ease, transform 0.3s ease;
     font-family: inherit;
   }
-
+ 
   .cta:hover { background: #C9A770; transform: translateY(-1px); }
-
+ 
   .scroll-hint {
     position: absolute;
     bottom: 40px;
@@ -148,24 +148,24 @@
     z-index: 2;
     animation: float 2.5s ease-in-out infinite;
   }
-
+ 
   @keyframes float {
     0%, 100% { transform: translate(-50%, 0); opacity: 0.5; }
     50%      { transform: translate(-50%, 8px); opacity: 0.9; }
   }
-
+ 
   /* ---------- Pillars section ---------- */
   .pillars {
     position: relative;
     padding: 160px 48px 180px;
     background: #0B0D0C;
   }
-
+ 
   .pillars-inner {
     max-width: 1100px;
     margin: 0 auto;
   }
-
+ 
   .section-eyebrow {
     font-size: 11px;
     letter-spacing: 0.3em;
@@ -174,7 +174,7 @@
     margin-bottom: 24px;
     text-align: center;
   }
-
+ 
   .section-title {
     font-family: 'Cormorant Garamond', Georgia, serif;
     font-size: clamp(32px, 4vw, 44px);
@@ -184,7 +184,7 @@
     letter-spacing: -0.01em;
     color: #F5F1EA;
   }
-
+ 
   .pillar {
     display: grid;
     grid-template-columns: 120px 1fr;
@@ -192,21 +192,21 @@
     align-items: start;
     padding: 56px 0;
     border-top: 1px solid rgba(245, 241, 234, 0.08);
-
+ 
     /* initial hidden state */
     opacity: 0;
     transform: translateY(60px);
     transition: opacity 1.1s cubic-bezier(0.22, 1, 0.36, 1),
                 transform 1.1s cubic-bezier(0.22, 1, 0.36, 1);
   }
-
+ 
   .pillar:last-child { border-bottom: 1px solid rgba(245, 241, 234, 0.08); }
-
+ 
   .pillar.visible {
     opacity: 1;
     transform: translateY(0);
   }
-
+ 
   /* Staggered children reveal */
   .pillar .pillar-number,
   .pillar .pillar-label,
@@ -215,11 +215,11 @@
     transform: translateY(20px);
     transition: opacity 0.9s ease-out, transform 0.9s ease-out;
   }
-
+ 
   .pillar.visible .pillar-number { transition-delay: 0.15s; opacity: 1; transform: translateY(0); }
   .pillar.visible .pillar-label  { transition-delay: 0.35s; opacity: 1; transform: translateY(0); }
   .pillar.visible .pillar-text   { transition-delay: 0.55s; opacity: 1; transform: translateY(0); }
-
+ 
   .pillar-number {
     font-family: 'Cormorant Garamond', Georgia, serif;
     font-size: 64px;
@@ -227,7 +227,7 @@
     line-height: 1;
     font-weight: 400;
   }
-
+ 
   .pillar-label {
     font-size: 13px;
     letter-spacing: 0.2em;
@@ -236,7 +236,7 @@
     margin-bottom: 18px;
     font-weight: 500;
   }
-
+ 
   .pillar-text {
     font-size: 17px;
     line-height: 1.65;
@@ -244,7 +244,7 @@
     max-width: 600px;
     font-weight: 300;
   }
-
+ 
   /* ---------- Footer ---------- */
   footer {
     background: #0B0D0C;
@@ -260,7 +260,7 @@
     flex-wrap: wrap;
     gap: 16px;
   }
-
+ 
   /* ---------- Responsive ---------- */
   @media (max-width: 768px) {
     nav       { padding: 20px 24px; }
@@ -271,7 +271,7 @@
     .pillar-number { font-size: 48px; }
     .section-title { margin-bottom: 72px; }
   }
-
+ 
   /* Respect reduced-motion preference */
   @media (prefers-reduced-motion: reduce) {
     .pillar,
@@ -286,122 +286,48 @@
 </style>
 </head>
 <body>
-
+ 
 <style>
-  @keyframes blink  { 0%,100%{opacity:0.25} 50%{opacity:1} }
-  @keyframes ticker {
-    0%   { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
-  }
-  .ticker-wrap {
-    overflow: hidden;
-    background: #C9A770;
-    border-bottom: 1px solid rgba(0,0,0,0.15);
-    padding: 11px 0;
-    white-space: nowrap;
-  }
-  .ticker-track {
-    display: inline-flex;
-    animation: ticker 22s linear infinite;
-  }
-  .ticker-track span {
-    font-family: 'Inter', sans-serif;
-    font-size: 11px;
-    font-weight: 500;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    color: #1A1D1B;
-    padding: 0 40px;
-  }
-  .ticker-dot {
-    display: inline-block;
-    width: 5px; height: 5px;
-    background: #1A1D1B;
-    border-radius: 50%;
-    vertical-align: middle;
-    opacity: 0.4;
-    margin: 0 4px;
-  }
-  .wip-block {
-    background: #1A1D1B;
-    border-bottom: 1px solid rgba(201,167,112,0.25);
-    padding: 28px 48px;
+  @keyframes wip-pulse { 0%,100%{ opacity:0.3; transform:scale(1); } 50%{ opacity:1; transform:scale(1.35); } }
+  .wip-bar {
+    background: #0F1210;
+    border-bottom: 1px solid rgba(201,167,112,0.18);
+    padding: 10px 48px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 24px;
-    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
   }
-  .wip-left { display: flex; align-items: center; gap: 16px; }
-  .wip-pulse {
-    width: 10px; height: 10px;
+  .wip-dot {
+    width: 5px; height: 5px;
     background: #C9A770;
     border-radius: 50%;
     flex-shrink: 0;
-    animation: blink 1.8s ease-in-out infinite;
+    animation: wip-pulse 2.4s ease-in-out infinite;
   }
-  .wip-heading {
-    font-family: 'Cormorant Garamond', Georgia, serif;
-    font-size: 22px;
-    font-weight: 400;
-    color: #F5F1EA;
-  }
-  .wip-sub {
-    font-size: 13px;
-    color: rgba(245,241,234,0.55);
-    margin-top: 3px;
-    font-weight: 300;
-  }
-  .wip-tag {
-    font-size: 10px;
+  .wip-text {
+    font-size: 11px;
     letter-spacing: 0.2em;
     text-transform: uppercase;
-    font-weight: 500;
-    color: #C9A770;
-    border: 1px solid rgba(201,167,112,0.4);
-    padding: 7px 16px;
-    white-space: nowrap;
+    color: rgba(201,167,112,0.7);
+    font-weight: 400;
+    font-family: 'Inter', sans-serif;
   }
-  @media(max-width:600px){
-    .wip-block { padding: 24px; }
-    .wip-heading { font-size: 18px; }
+  .wip-divider {
+    width: 1px; height: 10px;
+    background: rgba(201,167,112,0.25);
+    flex-shrink: 0;
   }
+  @media(max-width:600px){ .wip-bar { padding: 10px 24px; } }
 </style>
-
-<!-- Gold ticker -->
-<div class="ticker-wrap">
-  <div class="ticker-track">
-    <span>Currently building</span><span class="ticker-dot"></span>
-    <span>Something is coming</span><span class="ticker-dot"></span>
-    <span>Under construction</span><span class="ticker-dot"></span>
-    <span>Stay tuned</span><span class="ticker-dot"></span>
-    <span>Currently building</span><span class="ticker-dot"></span>
-    <span>Something is coming</span><span class="ticker-dot"></span>
-    <span>Under construction</span><span class="ticker-dot"></span>
-    <span>Stay tuned</span><span class="ticker-dot"></span>
-    <span>Currently building</span><span class="ticker-dot"></span>
-    <span>Something is coming</span><span class="ticker-dot"></span>
-    <span>Under construction</span><span class="ticker-dot"></span>
-    <span>Stay tuned</span><span class="ticker-dot"></span>
-    <span>Currently building</span><span class="ticker-dot"></span>
-    <span>Something is coming</span><span class="ticker-dot"></span>
-    <span>Under construction</span><span class="ticker-dot"></span>
-    <span>Stay tuned</span><span class="ticker-dot"></span>
-  </div>
+ 
+<div class="wip-bar">
+  <div class="wip-dot"></div>
+  <span class="wip-text">In development</span>
+  <div class="wip-divider"></div>
+  <span class="wip-text" style="opacity:0.55;">Something is on its way</span>
 </div>
-
-<!-- Under construction block -->
-<div class="wip-block">
-  <div class="wip-left">
-    <div class="wip-pulse"></div>
-    <div>
-      <div class="wip-heading">We're building something.</div>
-      <div class="wip-sub">Optellie is in active development — check back soon for the full experience.</div>
-    </div>
-  </div>
-  <div class="wip-tag">In development</div>
-</div>
-
+ 
 <nav id="nav">
   <div class="logo">
     <svg width="20" height="20" viewBox="0 0 22 22" fill="none">
@@ -412,28 +338,28 @@
   </div>
   <a href="#contact" class="cta" style="padding: 10px 20px; font-size: 11px;">Get in touch</a>
 </nav>
-
+ 
 <!-- Hero -->
 <section class="hero">
   <div class="hero-bg"></div>
   <div class="hero-vignette"></div>
-
+ 
   <div class="hero-content">
     <div class="eyebrow">— Intelligence for industry</div>
     <h1>Smarter operations,<br/>built on the floor.</h1>
     <p>Optellie brings quiet intelligence to the manufacturing floor — turning everyday operations into clear, connected, continuously improving systems. Private by design. Built for the people who actually run the line.</p>
     <a href="#approach" class="cta">Learn more</a>
   </div>
-
+ 
   <div class="scroll-hint">Scroll ↓</div>
 </section>
-
+ 
 <!-- Pillars -->
 <section class="pillars" id="approach">
   <div class="pillars-inner">
     <div class="section-eyebrow">— Our approach</div>
     <h2 class="section-title">Three steps. One continuous loop.</h2>
-
+ 
     <div class="pillar" data-reveal>
       <div class="pillar-number serif">01</div>
       <div>
@@ -441,7 +367,7 @@
         <p class="pillar-text">Training, SOPs, tribal knowledge — structured and made useful without leaving your walls. Nothing leaves the plant, nothing gets uploaded to someone else's cloud.</p>
       </div>
     </div>
-
+ 
     <div class="pillar" data-reveal>
       <div class="pillar-number serif">02</div>
       <div>
@@ -449,7 +375,7 @@
         <p class="pillar-text">Clear, hands-on guidance the way your team actually works — visual, direct, no jargon. Built for the people running the line, not the people selling software.</p>
       </div>
     </div>
-
+ 
     <div class="pillar" data-reveal>
       <div class="pillar-number serif">03</div>
       <div>
@@ -459,13 +385,13 @@
     </div>
   </div>
 </section>
-
+ 
 <footer id="contact">
   <span>© 2026 Optellie</span>
   <span>Private. Local. Industrial.</span>
   <span>Contact coming soon</span>
 </footer>
-
+ 
 <script>
   // Nav background on scroll
   const nav = document.getElementById('nav');
@@ -473,7 +399,7 @@
     if (window.scrollY > 40) nav.classList.add('scrolled');
     else nav.classList.remove('scrolled');
   });
-
+ 
   // Scroll-reveal for pillars
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
@@ -486,9 +412,9 @@
     threshold: 0.25,
     rootMargin: '0px 0px -80px 0px'
   });
-
+ 
   document.querySelectorAll('[data-reveal]').forEach(el => observer.observe(el));
 </script>
-
+ 
 </body>
 </html>
