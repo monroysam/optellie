@@ -44,7 +44,7 @@ nav.scrolled{background:rgba(15,18,16,0.9);backdrop-filter:blur(14px);-webkit-ba
 #optellie-float{
   position:fixed;top:0;left:0;z-index:200;
   font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
-  font-weight:400;text-transform:uppercase;color:var(--text);
+  font-weight:200;text-transform:uppercase;color:var(--text);
   display:flex;align-items:center;gap:0px;white-space:nowrap;
   pointer-events:none;opacity:0;
   transform-origin:left top;
@@ -196,9 +196,8 @@ footer{
   .wip-label,.wip-label-dim{font-size:10px;letter-spacing:0.12em;}
   .scroll-hint{bottom:20px;font-size:10px;}
   .pillars{padding:72px 20px 100px;}
-  #approach-spacer{font-size:clamp(20px,8vw,34px); max-width:88vw;}
-  #approach-float{max-width:88vw; text-align:center;}
-  .section-subtitle{font-size:11px;letter-spacing:0.12em;margin-top:56px;margin-bottom:44px; padding:0 10px;}
+  #approach-spacer{font-size:clamp(24px,9vw,40px);}
+  .section-subtitle{font-size:11px;letter-spacing:0.12em;margin-top:28px;margin-bottom:44px;}
   .pillar{grid-template-columns:1fr;gap:12px;padding:32px 0;}
   .pillar-number{font-size:40px;}
   .pillar-label{font-size:12px;letter-spacing:0.14em;margin-bottom:10px;}
@@ -325,27 +324,11 @@ function easeOutQuint(t){return 1-Math.pow(1-t,5);}
 function easeInOut(t){return t<0.5?2*t*t:-1+(4-2*t)*t;}
 function isMob(){ return window.innerWidth <= 768; }
 
-// Time-based animator: moves 'current' toward 'target' at px/ms rate
-function animateToward(current, target, dt, durationMs){
-  if (current === target) return target;
-  const step = dt / Math.max(durationMs, 1);
-  return target > current
-    ? Math.min(current + step, target)
-    : Math.max(current - step, target);
-}
-function animateToward(current, target, dt, duration){
-  if (duration <= 0) return target;
-  const step = clamp(dt / duration, 0, 1);
-  return current + (target - current) * step;
-}
-
 const O = {};
 const A = {};
 let animationStarted = false;
 let rafRunning = false;
 let lastVW = window.innerWidth;
-let lastVH = window.innerHeight;
-let lastTs = 0;
 
 function updateMobileNavCta() {
   if (!isMob()) {
@@ -380,7 +363,7 @@ function updateMobileNavCta() {
   navCtaTop.style.padding = `0 ${padX.toFixed(2)}px`;
   navCtaTop.style.borderRadius = radius.toFixed(2) + 'px';
   navCtaTop.style.letterSpacing = letter.toFixed(3) + 'em';
-  navCtaTop.style.transform = `translateY(${lerp(0, 6, p).toFixed(2)}px)`;
+  navCtaTop.style.transform = `translateY(${lerp(0, 12, p).toFixed(2)}px)`;
 
   const textFade = clamp((p - 0.10) / 0.52, 0, 1);
   navCtaText.style.opacity = (1 - textFade).toFixed(3);
@@ -401,23 +384,22 @@ function init(){
 
   O.navLeft   = mob ? 20 : 48;
   O.navTop    = mob ? 18 : 20;
-  O.navFont   = mob ? Math.max(10.5, Math.min(12, vw * 0.030)) : 20;
+  O.navFont   = mob ? 12 : 20;
   O.navIcon   = 0;
   O.navGap    = 0;
   O.startLS   = 0.12;
   O.navLS     = mob ? 0.14 : 0.18;
-  O.leftProg  = clamp(O.leftProg ?? 0, 0, 1);
-  O.leftDuration = mob ? 380 : 440;
-  lastTs = 0;
 
-  A.navFont   = mob ? Math.max(22, Math.min(28, vw * 0.068)) : 28;
+  // 40% bigger banner size for Our approach
+  A.navFont   = mob ? 30 : 28;
   A.navTop    = mob ? 18 : 20;
 
+  // --- OPTELLIE snapshot ---
   const sr = heroSpacer.getBoundingClientRect();
-  O.startFont = parseFloat(window.getComputedStyle(heroSpacer).fontSize);
-  O.startAbsY = sr.top + sy;
-  O.startTop  = O.startAbsY;
-  O.startCX   = sr.left + sr.width / 2;
+  O.startFont  = parseFloat(window.getComputedStyle(heroSpacer).fontSize);
+  O.startAbsY  = sr.top + sy;
+  O.startTop   = O.startAbsY;
+  O.startCX    = sr.left + sr.width / 2;
   O.scaleToNav = O.navFont / O.startFont;
 
   optEl.style.top = '0';
@@ -429,6 +411,7 @@ function init(){
   iconEl.style.height = '0px';
   iconEl.style.opacity = '0';
 
+  // Measure text only for mobile stable method, full width for desktop current method.
   const textSpan = optEl.querySelector('span');
   const textRect = textSpan.getBoundingClientRect();
   O.textHalfW = textRect.width / 2;
@@ -442,6 +425,7 @@ function init(){
   optEl.style.transform = `translate(${initX}px,${initY}px) scale(1)`;
   optEl.style.opacity = '1';
 
+  // --- OUR APPROACH snapshot ---
   const ar = appSpacer.getBoundingClientRect();
   A.startFont  = parseFloat(window.getComputedStyle(appSpacer).fontSize);
   A.startAbsY  = ar.top + sy;
@@ -467,19 +451,13 @@ function init(){
   }
   appEl.style.opacity = '0';
 
-  O.leftProg = O.leftProg ?? 0;  // preserve across re-inits
-  A.riseProg = A.riseProg ?? 0;   // preserve approach rise across re-inits
-  O.lastFrameTime = performance.now();
   animationStarted = true;
   updateMobileNavCta();
 }
 
-function frame(ts){
+function frame(){
   requestAnimationFrame(frame);
   if (!animationStarted) return;
-
-  const dt = lastTs ? Math.min(34, ts - lastTs) : 16;
-  lastTs = ts;
 
   const sy = window.scrollY || 0;
   const vh = window.innerHeight;
@@ -492,25 +470,23 @@ function frame(ts){
   let appProg = 0;
 
   if (mob) {
+    // ── MOBILE: revert to older stable pure-transform method ──────────
+    // OUR APPROACH
     const appViewY = A.startAbsY - sy;
     const pillarsBottom = pillarsEl.getBoundingClientRect().bottom;
     const inView = appViewY < vh * 0.95 && pillarsBottom > 0;
 
     if (inView) {
-      // Fade in as section enters viewport — always show it while visible
       const fadeIn = clamp((vh * 0.85 - appViewY) / (vh * 0.15), 0, 1);
       appEl.style.opacity = easeInOut(fadeIn).toFixed(3);
 
-      // Rise ONLY when at true page bottom — same pattern as Optellie left sweep
-      const atBottomApp = (sy + vh) >= document.documentElement.scrollHeight - 2;
-      const appTarget = atBottomApp ? 1 : 0;
-      A.riseProg = animateToward(A.riseProg ?? 0, appTarget, dt, O.leftDuration);
-      appProg = A.riseProg;
+      const mobileRiseTrigger = vh * 0.25;
+      const riseRaw = clamp((mobileRiseTrigger - appViewY) / (mobileRiseTrigger - A.navTop), 0, 1);
+      appProg = easeOutQuint(riseRaw);
 
-      const mobileApproachTop = A.navTop - 4;
-      const appNatural = appViewY; // stays at natural scroll position until triggered
-      const appY = lerp(appNatural, mobileApproachTop, easeInOut(appProg));
-      const appScale = lerp(1, A.scaleRatio, easeInOut(appProg));
+      const appNatural = Math.max(appViewY, A.navTop);
+      const appY = lerp(appNatural, A.navTop, appProg);
+      const appScale = lerp(1, A.scaleRatio, appProg);
       const appX = A.startCX - A.halfW * appScale;
 
       appEl.style.transform = `translate(${appX.toFixed(2)}px,${appY.toFixed(2)}px) scale(${appScale.toFixed(4)})`;
@@ -519,6 +495,7 @@ function frame(ts){
       appProg = 0;
     }
 
+    // OPTELLIE
     const tA  = clamp(sy / (heroH * 0.55), 0, 1);
     const p1  = clamp(tA / 0.35, 0, 1);
     const p1s = easeOutQuint(p1);
@@ -532,51 +509,46 @@ function frame(ts){
     const optY = tA < 0.35 ? phase1Y : phase2Y;
 
     const optScale = lerp(1, O.scaleToNav, p1s);
-
-    // Auto-complete left sweep when at page bottom; reverse on scroll up
-    const atBottom = (sy + vh) >= document.documentElement.scrollHeight - 2;
-    const leftTarget = atBottom ? 1 : 0; // ONLY sweep at true page bottom
-    O.leftProg = animateToward(O.leftProg, leftTarget, dt, O.leftDuration);
+    const pillarsViewTop = pillarsEl.getBoundingClientRect().top;
+    const bRaw = clamp((vh * 0.5 - pillarsViewTop) / (vh * 0.5), 0, 1);
+    const tB = easeInOut(bRaw);
 
     const centeredX = O.startCX - O.textHalfW * optScale;
-    const optX = lerp(centeredX, O.navLeft, easeInOut(O.leftProg));
-
-    // Font weight: bold (400) → thin (200) as it rises
-    optEl.style.fontWeight = Math.round(lerp(400, 200, p1s));
+    const optX = lerp(centeredX, O.navLeft, tB);
 
     optEl.style.transform = `translate(${optX.toFixed(2)}px,${optY.toFixed(2)}px) scale(${optScale.toFixed(4)})`;
-    optEl.style.letterSpacing = lerp(0.12, 0.14, O.leftProg).toFixed(3) + 'em';
-    optEl.style.gap = lerp(0, O.navGap, O.leftProg).toFixed(1) + 'px';
-    iconEl.style.width = lerp(0, O.navIcon, O.leftProg).toFixed(1) + 'px';
-    iconEl.style.height = lerp(0, O.navIcon, O.leftProg).toFixed(1) + 'px';
-    iconEl.style.opacity = (O.leftProg > 0.05 ? O.leftProg : 0).toFixed(3);
+    optEl.style.letterSpacing = lerp(0.12, 0.14, tB).toFixed(3) + 'em';
+    optEl.style.gap = lerp(0, O.navGap, tB).toFixed(1) + 'px';
+    iconEl.style.width = lerp(0, O.navIcon, tB).toFixed(1) + 'px';
+    iconEl.style.height = lerp(0, O.navIcon, tB).toFixed(1) + 'px';
+    iconEl.style.opacity = (tB > 0.05 ? tB : 0).toFixed(3);
 
-    const settled = O.leftProg > 0.95;
+    const settled = tB > 0.95;
     optEl.style.pointerEvents = settled ? 'all' : 'none';
     optEl.style.cursor = settled ? 'pointer' : 'default';
     return;
   }
 
+  // ── DESKTOP: keep exactly as working version ───────────────────────
   const appNaturalY = A.startAbsY - sy;
   const pillarsRect = pillarsEl.getBoundingClientRect();
   const sectionStillVisible = pillarsRect.bottom > A.navTop;
 
   if (sectionStillVisible) {
-    // Fade in as section enters viewport
-    const fadeInRaw = clamp((vh * 0.92 - appNaturalY) / (vh * 0.16), 0, 1);
-    const fadeIn    = easeInOut(fadeInRaw);
-    appEl.style.opacity = Math.max(fadeIn, A.riseProg ?? 0 > 0 ? 1 : fadeIn).toFixed(3);
+    const riseStart = vh * 0.10;
+    const riseRange = vh * 0.18;
+    const appRaw    = clamp((riseStart - appNaturalY) / riseRange, 0, 1);
+    appProg         = easeInOut(appRaw);
 
-    // Rise ONLY at true page bottom — same pattern as Optellie left sweep
-    const atBottomApp = (sy + vh) >= document.documentElement.scrollHeight - 2;
-    const appTarget = atBottomApp ? 1 : 0;
-    A.riseProg = animateToward(A.riseProg ?? 0, appTarget, dt, O.leftDuration);
-    appProg = A.riseProg;
-
-    const appY      = lerp(appNaturalY, A.navTop, easeInOut(appProg));
-    const appScale  = lerp(1, A.scaleRatio, easeInOut(appProg));
+    const appY      = lerp(appNaturalY, A.navTop, appProg);
+    const appScale  = lerp(1, A.scaleRatio, appProg);
     const appX      = A.startCX - A.halfW * appScale;
 
+    const fadeInRaw = clamp((vh * 0.92 - appNaturalY) / (vh * 0.16), 0, 1);
+    const fadeIn    = easeInOut(fadeInRaw);
+    const baseOpacity = Math.max(fadeIn, appProg > 0 ? 1 : fadeIn);
+
+    appEl.style.opacity = baseOpacity.toFixed(3);
     appEl.style.transform = `translate(${appX.toFixed(2)}px,${appY.toFixed(2)}px) scale(${appScale.toFixed(4)})`;
   } else {
     appEl.style.opacity = '0';
@@ -589,35 +561,29 @@ function frame(ts){
 
   const naturalOptY = O.startAbsY - sy;
   const targetDesktopTop = O.desktopAlignedTop;
+  // Prevent the path from overshooting above the final top line and then dropping down.
+  // Once the natural position reaches the target line, lock the source of the lerp there
+  // so the animation eases into the final position without a last-moment snap.
   const desktopSourceY = Math.max(naturalOptY, targetDesktopTop);
   const optY = lerp(desktopSourceY, targetDesktopTop, p1s);
   const optScale = lerp(1, O.scaleToNav, p1s);
 
-  // Auto-complete left sweep when at page bottom; reverse on scroll up
-  const atBottom = (sy + vh) >= document.documentElement.scrollHeight - 2;
-  const leftTarget = atBottom ? 1 : 0; // ONLY sweep at true page bottom
-  O.leftProg = animateToward(O.leftProg, leftTarget, dt, O.leftDuration);
-  const leftEase = easeInOut(O.leftProg);
-
-  const iconNow = lerp(0, O.navIcon, leftEase);
-  const gapNow  = lerp(0, O.navGap, leftEase);
-  const lsNow   = lerp(O.startLS, O.navLS, leftEase);
+  const iconNow = lerp(0, O.navIcon, appProg);
+  const gapNow  = lerp(0, O.navGap, appProg);
+  const lsNow   = lerp(O.startLS, O.navLS, appProg);
 
   const currentHalfW = ((O.startHalfW * 2) + iconNow + gapNow) * optScale / 2;
   const centeredX    = O.startCX - currentHalfW;
-  const optX         = lerp(centeredX, O.navLeft, leftEase);
-
-  // Font weight: bold (400) → thin (200) as it rises
-  optEl.style.fontWeight = Math.round(lerp(400, 200, p1s));
+  const optX         = lerp(centeredX, O.navLeft, appProg);
 
   optEl.style.transform = `translate(${optX.toFixed(2)}px,${optY.toFixed(2)}px) scale(${optScale.toFixed(4)})`;
   optEl.style.letterSpacing = lsNow.toFixed(3) + 'em';
   optEl.style.gap = gapNow.toFixed(1) + 'px';
   iconEl.style.width = iconNow.toFixed(1) + 'px';
   iconEl.style.height = iconNow.toFixed(1) + 'px';
-  iconEl.style.opacity = leftEase.toFixed(3);
+  iconEl.style.opacity = appProg.toFixed(3);
 
-  const settled = O.leftProg > 0.95;
+  const settled = appProg > 0.95;
   optEl.style.pointerEvents = settled ? 'all' : 'none';
   optEl.style.cursor = settled ? 'pointer' : 'default';
 }
@@ -632,29 +598,26 @@ const revealObs = new IntersectionObserver(entries=>{
 },{threshold:0.2,rootMargin:'0px 0px -60px 0px'});
 document.querySelectorAll('[data-reveal]').forEach(el=>revealObs.observe(el));
 
-let resizeTimer = null;
-function scheduleInit(){
-  clearTimeout(resizeTimer);
-  resizeTimer = setTimeout(()=>{
-    lastVW = window.innerWidth;
-    lastVH = window.innerHeight;
-    requestAnimationFrame(()=>requestAnimationFrame(()=>{
-      init();
-    }));
-  }, 140);
-}
-window.addEventListener('resize', scheduleInit, {passive:true});
-window.addEventListener('orientationchange', ()=>{ setTimeout(scheduleInit, 160); }, {passive:true});
-window.addEventListener('pageshow', scheduleInit, {passive:true});
-if (window.visualViewport) {
-  window.visualViewport.addEventListener('resize', scheduleInit, {passive:true});
-}
+window.addEventListener('resize',()=>{
+  const vw = window.innerWidth;
+  // mobile: ignore address-bar height churn; re-init only on real width change
+  if (Math.abs(vw - lastVW) > 10){
+    lastVW = vw;
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{ init(); }));
+  }
+},{passive:true});
+window.addEventListener('orientationchange',()=>{
+  setTimeout(()=>requestAnimationFrame(()=>requestAnimationFrame(()=>{ lastVW = window.innerWidth; init(); })), 120);
+},{passive:true});
+window.addEventListener('pageshow',()=>{
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{ lastVW = window.innerWidth; init(); }));
+},{passive:true});
 
 function boot(){
   if (rafRunning) return;
   rafRunning = true;
   init();
-  requestAnimationFrame(frame);
+  frame();
   optEl.addEventListener('click',()=>{
     if(optEl.style.pointerEvents==='all'){
       window.scrollTo({top:0,behavior:'smooth'});
