@@ -196,8 +196,9 @@ footer{
   .wip-label,.wip-label-dim{font-size:10px;letter-spacing:0.12em;}
   .scroll-hint{bottom:20px;font-size:10px;}
   .pillars{padding:72px 20px 100px;}
-  #approach-spacer{font-size:clamp(24px,9vw,40px);}
-  .section-subtitle{font-size:11px;letter-spacing:0.12em;margin-top:28px;margin-bottom:44px;}
+  #approach-spacer{font-size:clamp(20px,8vw,34px); max-width:88vw;}
+  #approach-float{max-width:88vw; text-align:center;}
+  .section-subtitle{font-size:11px;letter-spacing:0.12em;margin-top:56px;margin-bottom:44px; padding:0 10px;}
   .pillar{grid-template-columns:1fr;gap:12px;padding:32px 0;}
   .pillar-number{font-size:40px;}
   .pillar-label{font-size:12px;letter-spacing:0.14em;margin-bottom:10px;}
@@ -324,11 +325,42 @@ function easeOutQuint(t){return 1-Math.pow(1-t,5);}
 function easeInOut(t){return t<0.5?2*t*t:-1+(4-2*t)*t;}
 function isMob(){ return window.innerWidth <= 768; }
 
+// Time-based animator — moves value toward target at fixed ms rate, scroll-independent
+function animateToward(current, target, dt, durationMs){
+  if(current === target) return target;
+  const step = dt / Math.max(durationMs, 1);
+  return target > current ? Math.min(current + step, target) : Math.max(current - step, target);
+}
+
 const O = {};
 const A = {};
 let animationStarted = false;
 let rafRunning = false;
 let lastVW = window.innerWidth;
+let lastTime = 0;
+
+// ── Trigger flags — set by IntersectionObserver, never by scroll ────────
+// Once the approach section enters the viewport, these fire and animate
+// to completion at their own pace regardless of scroll position.
+let leftTriggered  = false;  // Optellie sweep left
+let riseTriggered  = false;  // Our approach rise up
+O.leftProg = 0;              // 0 = centered, 1 = at nav left
+A.riseProg = 0;              // 0 = natural position, 1 = at nav top
+
+const SWEEP_DURATION = 700;  // ms — Optellie left sweep
+const RISE_DURATION  = 600;  // ms — Our approach rise
+
+// IntersectionObserver: fires when user scrolls PAST the scroll-hint text
+// Trigger = scroll-hint is above viewport (not intersecting AND top < 0)
+const scrollHintEl = document.querySelector('.scroll-hint');
+const triggerObs = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    const pastTop = !e.isIntersecting && e.boundingClientRect.top < 0;
+    leftTriggered = pastTop;
+    riseTriggered = pastTop;
+  });
+}, { threshold: 0 });
+triggerObs.observe(scrollHintEl);
 
 function updateMobileNavCta() {
   if (!isMob()) {
@@ -347,16 +379,13 @@ function updateMobileNavCta() {
     navCtaCaret.style.transform = '';
     return;
   }
-
   const raw = clamp((window.scrollY - 6) / 96, 0, 1);
   const p = easeInOut(raw);
-
   const width = lerp(122, 34, p);
   const height = lerp(36, 34, p);
   const padX = lerp(14, 0, p);
   const radius = lerp(14, 999, p);
   const letter = lerp(0.14, 0, p);
-
   navCtaTop.style.width = width.toFixed(2) + 'px';
   navCtaTop.style.minWidth = width.toFixed(2) + 'px';
   navCtaTop.style.height = height.toFixed(2) + 'px';
@@ -364,16 +393,13 @@ function updateMobileNavCta() {
   navCtaTop.style.borderRadius = radius.toFixed(2) + 'px';
   navCtaTop.style.letterSpacing = letter.toFixed(3) + 'em';
   navCtaTop.style.transform = `translateY(${lerp(0, 12, p).toFixed(2)}px)`;
-
   const textFade = clamp((p - 0.10) / 0.52, 0, 1);
   navCtaText.style.opacity = (1 - textFade).toFixed(3);
   navCtaText.style.transform = `translateY(${lerp(0, -18, textFade).toFixed(2)}%) scale(${lerp(1, 0.92, textFade).toFixed(3)})`;
-
   const caretFade = clamp((p - 0.78) / 0.18, 0, 1);
   navCtaCaret.style.opacity = caretFade.toFixed(3);
   navCtaCaret.style.top = '50%';
   navCtaCaret.style.transform = `translate(-50%,-50%) scale(${lerp(0.72, 0.92, caretFade).toFixed(3)})`;
-
   navCtaTop.classList.toggle('mobile-back', p > 0.82);
 }
 
@@ -382,19 +408,18 @@ function init(){
   const sy  = window.scrollY || 0;
   const vw  = window.innerWidth;
 
-  O.navLeft   = mob ? 20 : 48;
-  O.navTop    = mob ? 18 : 20;
-  O.navFont   = mob ? 12 : 20;
-  O.navIcon   = 0;
-  O.navGap    = 0;
-  O.startLS   = 0.12;
-  O.navLS     = mob ? 0.14 : 0.18;
+  O.navLeft = mob ? 20 : 48;
+  O.navTop  = mob ? 18 : 20;
+  O.navFont = mob ? 12 : 20;
+  O.navIcon = 0;
+  O.navGap  = 0;
+  O.startLS = 0.12;
+  O.navLS   = mob ? 0.14 : 0.18;
 
-  // 40% bigger banner size for Our approach
-  A.navFont   = mob ? 30 : 28;
-  A.navTop    = mob ? 18 : 20;
+  A.navFont = mob ? 30 : 28;
+  A.navTop  = mob ? 18 : 20;
 
-  // --- OPTELLIE snapshot ---
+  // Optellie snapshot
   const sr = heroSpacer.getBoundingClientRect();
   O.startFont  = parseFloat(window.getComputedStyle(heroSpacer).fontSize);
   O.startAbsY  = sr.top + sy;
@@ -411,7 +436,6 @@ function init(){
   iconEl.style.height = '0px';
   iconEl.style.opacity = '0';
 
-  // Measure text only for mobile stable method, full width for desktop current method.
   const textSpan = optEl.querySelector('span');
   const textRect = textSpan.getBoundingClientRect();
   O.textHalfW = textRect.width / 2;
@@ -425,7 +449,7 @@ function init(){
   optEl.style.transform = `translate(${initX}px,${initY}px) scale(1)`;
   optEl.style.opacity = '1';
 
-  // --- OUR APPROACH snapshot ---
+  // Our approach snapshot
   const ar = appSpacer.getBoundingClientRect();
   A.startFont  = parseFloat(window.getComputedStyle(appSpacer).fontSize);
   A.startAbsY  = ar.top + sy;
@@ -438,170 +462,143 @@ function init(){
   const appRect = appEl.getBoundingClientRect();
   A.halfW = appRect.width / 2;
   A.heightRatio = appRect.height / A.startFont;
+
   if (mob) {
     const appFinalH = A.navFont * A.heightRatio;
     const optFinalH = O.navFont * O.textHeightRatio;
-    O.mobileAlignedTop = A.navTop + (appFinalH - optFinalH) / 2;
+    O.mobileAlignedTop  = A.navTop + (appFinalH - optFinalH) / 2;
     O.desktopAlignedTop = O.navTop;
   } else {
     const appFinalH = A.navFont * A.heightRatio;
     const optFinalH = O.navFont * O.textHeightRatio;
     O.desktopAlignedTop = A.navTop + (appFinalH - optFinalH) / 2;
-    O.mobileAlignedTop = O.navTop;
+    O.mobileAlignedTop  = O.navTop;
   }
   appEl.style.opacity = '0';
-
   animationStarted = true;
   updateMobileNavCta();
 }
 
-function frame(){
+function frame(ts){
   requestAnimationFrame(frame);
   if (!animationStarted) return;
 
-  const sy = window.scrollY || 0;
-  const vh = window.innerHeight;
+  const dt  = lastTime ? Math.min(ts - lastTime, 64) : 16;
+  lastTime  = ts;
+
+  const sy  = window.scrollY || 0;
+  const vh  = window.innerHeight;
   const heroH = heroEl.offsetHeight;
   const mob = isMob();
 
   navEl.classList.toggle('scrolled', sy > 40);
   updateMobileNavCta();
 
-  let appProg = 0;
+  // ── Animate trigger progs at fixed time rate (scroll-independent) ──
+  const leftTarget = leftTriggered ? 1 : 0;
+  const riseTarget = riseTriggered ? 1 : 0;
+  O.leftProg = animateToward(O.leftProg, leftTarget, dt, SWEEP_DURATION);
+  A.riseProg = animateToward(A.riseProg, riseTarget, dt, RISE_DURATION);
 
+  const leftEase = easeInOut(O.leftProg);
+  const riseEase = easeInOut(A.riseProg);
+
+  // ── OUR APPROACH ───────────────────────────────────────────────────
+  const appNaturalY = A.startAbsY - sy;  // where it sits naturally on page
+  const pillarsRect = pillarsEl.getBoundingClientRect();
+  const sectionVisible = pillarsRect.bottom > A.navTop;
+
+  if (sectionVisible) {
+    // Fade in as section enters viewport
+    const fadeInRaw = clamp((vh * 0.92 - appNaturalY) / (vh * 0.16), 0, 1);
+    const fadeIn = easeInOut(fadeInRaw);
+    // Opacity: fade in naturally, stay full once rise triggered
+    appEl.style.opacity = Math.max(fadeIn, riseEase).toFixed(3);
+
+    // Y: from natural page position → navTop, driven by fixed-rate riseProg
+    const appY     = lerp(appNaturalY, A.navTop, riseEase);
+    const appScale = lerp(1, A.scaleRatio, riseEase);
+    const appX     = A.startCX - A.halfW * appScale;
+    appEl.style.transform = `translate(${appX.toFixed(2)}px,${appY.toFixed(2)}px) scale(${appScale.toFixed(4)})`;
+  } else {
+    appEl.style.opacity = '0';
+  }
+
+  // ── OPTELLIE ───────────────────────────────────────────────────────
   if (mob) {
-    // ── MOBILE: revert to older stable pure-transform method ──────────
-    // OUR APPROACH
-    const appViewY = A.startAbsY - sy;
-    const pillarsBottom = pillarsEl.getBoundingClientRect().bottom;
-    const inView = appViewY < vh * 0.95 && pillarsBottom > 0;
-
-    if (inView) {
-      const fadeIn = clamp((vh * 0.85 - appViewY) / (vh * 0.15), 0, 1);
-      appEl.style.opacity = easeInOut(fadeIn).toFixed(3);
-
-      const mobileRiseTrigger = vh * 0.25;
-      const riseRaw = clamp((mobileRiseTrigger - appViewY) / (mobileRiseTrigger - A.navTop), 0, 1);
-      appProg = easeOutQuint(riseRaw);
-
-      const appNatural = Math.max(appViewY, A.navTop);
-      const appY = lerp(appNatural, A.navTop, appProg);
-      const appScale = lerp(1, A.scaleRatio, appProg);
-      const appX = A.startCX - A.halfW * appScale;
-
-      appEl.style.transform = `translate(${appX.toFixed(2)}px,${appY.toFixed(2)}px) scale(${appScale.toFixed(4)})`;
-    } else {
-      appEl.style.opacity = '0';
-      appProg = 0;
-    }
-
-    // OPTELLIE
     const tA  = clamp(sy / (heroH * 0.55), 0, 1);
     const p1  = clamp(tA / 0.35, 0, 1);
     const p1s = easeOutQuint(p1);
     const p2A = easeInOut(clamp((tA - 0.35) / 0.65, 0, 1));
 
-    const optTargetTop = O.mobileAlignedTop;
+    const optTargetTop  = O.mobileAlignedTop;
     const optStartViewY = O.startTop - sy;
-    const totalUp = optStartViewY - optTargetTop;
+    const totalUp       = optStartViewY - optTargetTop;
     const phase1Y = lerp(optStartViewY, optTargetTop + totalUp * 0.05, p1s);
     const phase2Y = lerp(optTargetTop + totalUp * 0.05, optTargetTop, p2A);
-    const optY = tA < 0.35 ? phase1Y : phase2Y;
-
+    const optY    = tA < 0.35 ? phase1Y : phase2Y;
     const optScale = lerp(1, O.scaleToNav, p1s);
-    const pillarsViewTop = pillarsEl.getBoundingClientRect().top;
-    const bRaw = clamp((vh * 0.5 - pillarsViewTop) / (vh * 0.5), 0, 1);
-    const tB = easeInOut(bRaw);
 
+    // X: fixed-rate left sweep via leftEase
     const centeredX = O.startCX - O.textHalfW * optScale;
-    const optX = lerp(centeredX, O.navLeft, tB);
+    const optX = lerp(centeredX, O.navLeft, leftEase);
 
-    optEl.style.transform = `translate(${optX.toFixed(2)}px,${optY.toFixed(2)}px) scale(${optScale.toFixed(4)})`;
-    optEl.style.letterSpacing = lerp(0.12, 0.14, tB).toFixed(3) + 'em';
-    optEl.style.gap = lerp(0, O.navGap, tB).toFixed(1) + 'px';
-    iconEl.style.width = lerp(0, O.navIcon, tB).toFixed(1) + 'px';
-    iconEl.style.height = lerp(0, O.navIcon, tB).toFixed(1) + 'px';
-    iconEl.style.opacity = (tB > 0.05 ? tB : 0).toFixed(3);
+    optEl.style.fontWeight = Math.round(lerp(400, 200, p1s));
+    optEl.style.transform  = `translate(${optX.toFixed(2)}px,${optY.toFixed(2)}px) scale(${optScale.toFixed(4)})`;
+    optEl.style.letterSpacing = lerp(0.12, 0.14, leftEase).toFixed(3) + 'em';
+    optEl.style.gap           = lerp(0, O.navGap, leftEase).toFixed(1) + 'px';
+    iconEl.style.width        = lerp(0, O.navIcon, leftEase).toFixed(1) + 'px';
+    iconEl.style.height       = lerp(0, O.navIcon, leftEase).toFixed(1) + 'px';
+    iconEl.style.opacity      = (leftEase > 0.05 ? leftEase : 0).toFixed(3);
 
-    const settled = tB > 0.95;
+    const settled = O.leftProg > 0.95;
     optEl.style.pointerEvents = settled ? 'all' : 'none';
-    optEl.style.cursor = settled ? 'pointer' : 'default';
+    optEl.style.cursor        = settled ? 'pointer' : 'default';
     return;
   }
 
-  // ── DESKTOP: keep exactly as working version ───────────────────────
-  const appNaturalY = A.startAbsY - sy;
-  const pillarsRect = pillarsEl.getBoundingClientRect();
-  const sectionStillVisible = pillarsRect.bottom > A.navTop;
-
-  if (sectionStillVisible) {
-    const riseStart = vh * 0.10;
-    const riseRange = vh * 0.18;
-    const appRaw    = clamp((riseStart - appNaturalY) / riseRange, 0, 1);
-    appProg         = easeInOut(appRaw);
-
-    const appY      = lerp(appNaturalY, A.navTop, appProg);
-    const appScale  = lerp(1, A.scaleRatio, appProg);
-    const appX      = A.startCX - A.halfW * appScale;
-
-    const fadeInRaw = clamp((vh * 0.92 - appNaturalY) / (vh * 0.16), 0, 1);
-    const fadeIn    = easeInOut(fadeInRaw);
-    const baseOpacity = Math.max(fadeIn, appProg > 0 ? 1 : fadeIn);
-
-    appEl.style.opacity = baseOpacity.toFixed(3);
-    appEl.style.transform = `translate(${appX.toFixed(2)}px,${appY.toFixed(2)}px) scale(${appScale.toFixed(4)})`;
-  } else {
-    appEl.style.opacity = '0';
-    appProg = 0;
-  }
-
+  // Desktop
   const tA  = clamp(sy / (heroH * 0.55), 0, 1);
   const p1  = clamp(tA / 0.35, 0, 1);
   const p1s = easeOutQuint(p1);
 
-  const naturalOptY = O.startAbsY - sy;
-  const targetDesktopTop = O.desktopAlignedTop;
-  // Prevent the path from overshooting above the final top line and then dropping down.
-  // Once the natural position reaches the target line, lock the source of the lerp there
-  // so the animation eases into the final position without a last-moment snap.
-  const desktopSourceY = Math.max(naturalOptY, targetDesktopTop);
-  const optY = lerp(desktopSourceY, targetDesktopTop, p1s);
-  const optScale = lerp(1, O.scaleToNav, p1s);
+  const naturalOptY    = O.startAbsY - sy;
+  const targetTop      = O.desktopAlignedTop;
+  const desktopSourceY = Math.max(naturalOptY, targetTop);
+  const optY           = lerp(desktopSourceY, targetTop, p1s);
+  const optScale       = lerp(1, O.scaleToNav, p1s);
 
-  const iconNow = lerp(0, O.navIcon, appProg);
-  const gapNow  = lerp(0, O.navGap, appProg);
-  const lsNow   = lerp(O.startLS, O.navLS, appProg);
+  // X: fixed-rate left sweep via leftEase
+  const iconNow = lerp(0, O.navIcon, leftEase);
+  const gapNow  = lerp(0, O.navGap,  leftEase);
+  const lsNow   = lerp(O.startLS, O.navLS, leftEase);
+  const halfW   = ((O.startHalfW * 2) + iconNow + gapNow) * optScale / 2;
+  const centeredX = O.startCX - halfW;
+  const optX      = lerp(centeredX, O.navLeft, leftEase);
 
-  const currentHalfW = ((O.startHalfW * 2) + iconNow + gapNow) * optScale / 2;
-  const centeredX    = O.startCX - currentHalfW;
-  const optX         = lerp(centeredX, O.navLeft, appProg);
-
-  optEl.style.transform = `translate(${optX.toFixed(2)}px,${optY.toFixed(2)}px) scale(${optScale.toFixed(4)})`;
+  optEl.style.fontWeight    = Math.round(lerp(400, 200, p1s));
+  optEl.style.transform     = `translate(${optX.toFixed(2)}px,${optY.toFixed(2)}px) scale(${optScale.toFixed(4)})`;
   optEl.style.letterSpacing = lsNow.toFixed(3) + 'em';
-  optEl.style.gap = gapNow.toFixed(1) + 'px';
-  iconEl.style.width = iconNow.toFixed(1) + 'px';
-  iconEl.style.height = iconNow.toFixed(1) + 'px';
-  iconEl.style.opacity = appProg.toFixed(3);
+  optEl.style.gap           = gapNow.toFixed(1) + 'px';
+  iconEl.style.width        = iconNow.toFixed(1) + 'px';
+  iconEl.style.height       = iconNow.toFixed(1) + 'px';
+  iconEl.style.opacity      = leftEase.toFixed(3);
 
-  const settled = appProg > 0.95;
+  const settled = O.leftProg > 0.95;
   optEl.style.pointerEvents = settled ? 'all' : 'none';
-  optEl.style.cursor = settled ? 'pointer' : 'default';
+  optEl.style.cursor        = settled ? 'pointer' : 'default';
 }
 
 const revealObs = new IntersectionObserver(entries=>{
   entries.forEach(e=>{
-    if(e.isIntersecting){
-      e.target.classList.add('visible');
-      revealObs.unobserve(e.target);
-    }
+    if(e.isIntersecting){ e.target.classList.add('visible'); revealObs.unobserve(e.target); }
   });
 },{threshold:0.2,rootMargin:'0px 0px -60px 0px'});
 document.querySelectorAll('[data-reveal]').forEach(el=>revealObs.observe(el));
 
 window.addEventListener('resize',()=>{
   const vw = window.innerWidth;
-  // mobile: ignore address-bar height churn; re-init only on real width change
-  if (Math.abs(vw - lastVW) > 10){
+  if(Math.abs(vw - lastVW) > 10){
     lastVW = vw;
     requestAnimationFrame(()=>requestAnimationFrame(()=>{ init(); }));
   }
@@ -614,29 +611,22 @@ window.addEventListener('pageshow',()=>{
 },{passive:true});
 
 function boot(){
-  if (rafRunning) return;
+  if(rafRunning) return;
   rafRunning = true;
   init();
-  frame();
+  requestAnimationFrame(frame);
   optEl.addEventListener('click',()=>{
-    if(optEl.style.pointerEvents==='all'){
-      window.scrollTo({top:0,behavior:'smooth'});
-    }
+    if(optEl.style.pointerEvents==='all') window.scrollTo({top:0,behavior:'smooth'});
   });
 }
 
 navCtaTop.addEventListener('click', () => {
-  if (isMob() && window.scrollY > 18) {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  } else {
-    openModal();
-  }
+  if(isMob() && window.scrollY > 18) window.scrollTo({top:0,behavior:'smooth'});
+  else openModal();
 });
 
-if (document.fonts && document.fonts.ready) {
-  document.fonts.ready.then(() => {
-    requestAnimationFrame(()=>requestAnimationFrame(boot));
-  });
+if(document.fonts && document.fonts.ready){
+  document.fonts.ready.then(()=>requestAnimationFrame(()=>requestAnimationFrame(boot)));
 } else {
   requestAnimationFrame(()=>requestAnimationFrame(boot));
 }
@@ -646,16 +636,16 @@ function openModal(){
   document.getElementById('modal-success').style.display='none';
   document.getElementById('modal').classList.add('open');
 }
-function closeModal(){document.getElementById('modal').classList.remove('open');}
-function handleOverlayClick(e){if(e.target.id==='modal')closeModal();}
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+function closeModal(){ document.getElementById('modal').classList.remove('open'); }
+function handleOverlayClick(e){ if(e.target.id==='modal') closeModal(); }
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(); });
 function sendEmail(){
   const name    = document.getElementById('modal-name').value.trim();
   const email   = document.getElementById('modal-email').value.trim();
   const message = document.getElementById('modal-message').value.trim();
-  if(!name||!email||!message){alert('Please fill in all fields.');return;}
+  if(!name||!email||!message){ alert('Please fill in all fields.'); return; }
   const subject = encodeURIComponent('Optellie — Inquiry from '+name);
-  const body    = encodeURIComponent('Name: '+name+'\nEmail: '+email+'\n\n'+message);
+  const body    = encodeURIComponent('Name: ' + name + '%0AEmail: ' + email + '%0A%0A' + message);
   window.location.href='mailto:penpanthersam@gmail.com?subject='+subject+'&body='+body;
   document.getElementById('modal-form').style.display='none';
   document.getElementById('modal-success').style.display='block';
