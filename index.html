@@ -364,6 +364,17 @@ footer{
   .solution-item{padding:32px 0;}
   .solutions-header{margin-bottom:52px;}
 }
+
+.modal-close{
+  position:absolute;top:16px;right:16px;
+  width:32px;height:32px;background:transparent;border:none;
+  cursor:pointer;color:var(--text-dim);font-size:18px;line-height:1;
+  display:flex;align-items:center;justify-content:center;
+  transition:color 0.2s;padding:0;
+}
+.modal-close:hover{color:var(--text);}
+.modal{position:relative;}
+.form-error{font-size:12px;color:#e06060;margin-top:8px;display:none;line-height:1.5;}
 </style>
 </head>
 <body>
@@ -475,6 +486,7 @@ footer{
 <!-- ─── MODAL ────────────────────────────────────────── -->
 <div class="modal-overlay" id="modal" onclick="if(event.target.id==='modal')closeModal()">
   <div class="modal">
+    <button class="modal-close" onclick="closeModal()" aria-label="Close">&#x2715;</button>
     <div id="modal-form">
       <div class="modal-eyebrow">Get in touch</div>
       <div class="modal-title">Say hello.</div>
@@ -483,9 +495,10 @@ footer{
       <input type="email" id="modal-email" placeholder="Your email"/>
       <textarea id="modal-message" rows="4" placeholder="What's on your mind?"></textarea>
       <div class="modal-actions">
-        <button class="modal-send" onclick="sendEmail()">Send message</button>
+        <button class="modal-send" onclick="sendEmail()" id="modal-send-btn">Send message</button>
         <button class="modal-cancel" onclick="closeModal()">Cancel</button>
       </div>
+      <div class="form-error" id="form-error"></div>
     </div>
     <div class="modal-success" id="modal-success">
       <p>Message sent.</p>
@@ -539,16 +552,46 @@ function openModal() {
 function closeModal() { document.getElementById('modal').classList.remove('open'); }
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
-function sendEmail() {
-  const name = document.getElementById('modal-name').value.trim();
-  const email = document.getElementById('modal-email').value.trim();
+async function sendEmail() {
+  const name    = document.getElementById('modal-name').value.trim();
+  const email   = document.getElementById('modal-email').value.trim();
   const message = document.getElementById('modal-message').value.trim();
-  if (!name || !email || !message) { alert('Please fill in all fields.'); return; }
-  const subject = encodeURIComponent('Optellie — Inquiry from ' + name);
-  const body = encodeURIComponent('Name: ' + name + '\nEmail: ' + email + '\n\n' + message);
-  window.location.href = 'mailto:penpanthersam@gmail.com?subject=' + subject + '&body=' + body;
-  document.getElementById('modal-form').style.display = 'none';
-  document.getElementById('modal-success').style.display = 'block';
+  const errEl   = document.getElementById('form-error');
+  const btn     = document.getElementById('modal-send-btn');
+  const form    = document.getElementById('modal-form');
+
+  errEl.style.display = 'none';
+
+  if (!name || !email || !message) {
+    errEl.textContent = 'Please fill in all fields.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  btn.textContent = 'Sending…';
+  btn.disabled = true;
+  form.style.opacity = '0.6';
+
+  try {
+    const res = await fetch('https://formspree.io/f/xdayddlg', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({ name, email, message })
+    });
+    if (res.ok) {
+      form.style.display = 'none';
+      document.getElementById('modal-success').style.display = 'block';
+    } else {
+      const data = await res.json();
+      throw new Error(data.error || 'Server error');
+    }
+  } catch {
+    btn.textContent = 'Send message';
+    btn.disabled = false;
+    form.style.opacity = '1';
+    errEl.textContent = 'Something went wrong — please try again or email penpanthersam@gmail.com';
+    errEl.style.display = 'block';
+  }
 }
 </script>
 </body>
