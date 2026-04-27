@@ -25,7 +25,7 @@ html{scroll-behavior:smooth;}
   --sans:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
 }
 body{
-  font-family:var(--sans);background:var(--bg);color:var(--text);
+  font-family:var(--sans);background:var(--bg);color:#E7DED2;
   line-height:1.6;font-weight:400;overflow-x:hidden;padding-bottom:36px;
   -webkit-font-smoothing:antialiased;
 }
@@ -61,8 +61,8 @@ nav.scrolled{
   height:25px;
   display:block;
   flex:0 0 auto;
-  color:var(--text);
-  opacity:0.96;
+  color:#E7DED2;
+  opacity:0.90;
 }
 .nav-logo-mark polygon{
   fill:currentColor;
@@ -148,7 +148,7 @@ nav.scrolled{
   position:absolute;top:50%;left:0;right:0;
   transform:translateY(-50%);
   font-family:var(--mono,'Space Mono',monospace);font-weight:400;
-  font-size:clamp(12px,1.6vw,22px);letter-spacing:0.2em;
+  font-size:clamp(14px,1.9vw,26px);letter-spacing:0.18em;
   text-transform:uppercase;color:var(--gold);
   text-align:center;opacity:0;transition:opacity 0.5s ease;
   pointer-events:none;white-space:nowrap;text-shadow:none;
@@ -251,14 +251,79 @@ nav.scrolled{
 }
 .card-body{font-size:14px;line-height:1.7;color:var(--text-dim);font-weight:400;}
 
-/* ─── FOOTER ──────────────────────────────────────────── */
+/* ─── FOOTER / CLOSING MARK ──────────────────────────── */
 footer{
-  background:var(--bg-soft);padding:32px 48px;
-  border-top:1px solid var(--border);
+  min-height:34vh;
+  background:linear-gradient(180deg, var(--bg-soft) 0%, #090B0A 100%);
+  padding:74px 48px 48px;
+  border-top:1px solid rgba(245,241,234,0.055);
   position:relative;z-index:1;
-  display:flex;justify-content:space-between;align-items:center;
-  font-size:11px;letter-spacing:0.14em;text-transform:uppercase;
-  color:rgba(245,241,234,0.25);flex-wrap:wrap;gap:14px;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-end;
+  align-items:center;
+  text-align:center;
+  gap:22px;
+  color:rgba(245,241,234,0.24);
+  overflow:hidden;
+}
+footer::before{
+  content:'';
+  position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:min(420px,64vw);height:1px;
+  background:linear-gradient(to right, transparent, rgba(201,167,112,0.26), transparent);
+}
+footer::after{
+  content:'';
+  position:absolute;inset:auto 0 0 0;height:90px;
+  background:linear-gradient(to top, rgba(0,0,0,0.18), transparent);
+  pointer-events:none;
+}
+.footer-brand{
+  position:relative;z-index:1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:0;
+  padding:10px 0 2px;
+  border:none;
+  background:transparent;
+  box-shadow:none;
+}
+.footer-brand::before,
+.footer-brand::after{display:none;}
+.footer-brand-svg{
+  width:clamp(205px,28vw,330px);
+  height:auto;
+  display:block;
+  color:#F1ECE3;
+  opacity:0.88;
+  filter:none;
+}
+.footer-brand-svg .mark-fill,
+.footer-brand-svg .wordmark{
+  fill:currentColor;
+}
+.footer-brand-svg .mark-stroke{
+  fill:none;
+  stroke:rgba(201,167,112,0.16);
+  stroke-miterlimit:10;
+  stroke-width:1.1;
+}
+.footer-meta{
+  position:relative;z-index:1;
+  width:min(820px,100%);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:14px;
+  padding-top:18px;
+  border-top:1px solid rgba(245,241,234,0.045);
+  font-size:10px;
+  letter-spacing:0.14em;
+  text-transform:uppercase;
 }
 
 /* ─── MODAL ───────────────────────────────────────────── */
@@ -316,17 +381,20 @@ footer{
   .hero-lockup{padding:28px 32px 24px;}
   .hero-lockup::before,.hero-lockup::after,
   .hero-lockup .corner-bl,.hero-lockup .corner-br{width:16px;height:16px;}
-  .split-reveal{font-size:clamp(6px,2.7vw,10px);letter-spacing:0.14em;}
+  .split-reveal{font-size:clamp(8px,3vw,12px);letter-spacing:0.12em;}
   .hero-body{font-size:15px;max-width:100%;margin-bottom:32px;}
   .cta-primary{padding:14px 28px;font-size:11px;}
   .scroll-cue{bottom:24px;}
   .product{padding:80px 24px;}
   .product-inner{grid-template-columns:1fr;gap:48px;}
-  footer{padding:24px;justify-content:center;text-align:center;gap:10px;}
+  footer{min-height:30vh;padding:58px 24px 44px;gap:18px;}
+  .footer-brand{padding:4px 0 0;width:100%;max-width:360px;}
+  .footer-brand-svg{width:min(70vw,280px);}
+  .footer-meta{justify-content:center;text-align:center;gap:10px;padding-top:16px;}
   .modal{padding:28px 20px;width:calc(100% - 24px);max-width:none;}
 }
 @media(max-width:380px){
-  .split-reveal{font-size:clamp(5px,2.4vw,8px);letter-spacing:0.1em;}
+  .split-reveal{font-size:clamp(7px,2.8vw,10px);letter-spacing:0.09em;}
 }
 @media(prefers-reduced-motion:reduce){
   .nav-logo,.nav-cta{opacity:1;animation:none;transform:none;}
@@ -398,6 +466,7 @@ footer{
 .modal-close:hover{color:var(--text);}
 .modal{position:relative;}
 .form-error{font-size:12px;color:#e06060;margin-top:8px;display:none;line-height:1.5;}
+
 </style>
 </head>
 <body>
@@ -538,9 +607,25 @@ footer{
 
 <!-- ─── FOOTER ───────────────────────────────────────── -->
 <footer>
-  <span>© 2026 Optellie</span>
-  <span>Private · Local · Industrial</span>
+  <div class="footer-brand" aria-label="Optellie">
+    <svg class="footer-brand-svg" viewBox="95 100 650 360" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+      <polygon class="mark-fill" points="131.44 376.6 131.7 269.39 213.42 318.29 213.16 425.5 131.44 376.6"/>
+      <polygon class="mark-stroke" points="131.44 376.6 131.7 269.39 213.42 318.29 213.16 425.5 131.44 376.6"/>
+      <polygon class="mark-fill" points="213.5 220.89 213.32 115.28 295.3 163.78 295.47 269.39 213.5 220.89"/>
+      <polygon class="mark-stroke" points="213.5 220.89 213.32 115.28 295.3 163.78 295.47 269.39 213.5 220.89"/>
+      <polygon class="mark-fill" points="213.32 220.26 295.2 269.39 213.32 318.52 131.44 269.39 213.32 220.26"/>
+      <polygon class="mark-stroke" points="213.32 220.26 295.2 269.39 213.32 318.52 131.44 269.39 213.32 220.26"/>
+      <polygon class="mark-fill" points="213.42 114.96 295.3 164.08 213.42 213.21 131.54 164.08 213.42 114.96"/>
+      <polygon class="mark-stroke" points="213.42 114.96 295.3 164.08 213.42 213.21 131.54 164.08 213.42 114.96"/>
+      <text class="wordmark" x="361.37" y="308.68" font-family="Inter, -apple-system, BlinkMacSystemFont, sans-serif" font-size="100" font-weight="400">Optellie</text>
+    </svg>
+  </div>
+  <div class="footer-meta">
+    <span>© 2026 Optellie</span>
+    <span>Private · Local · Industrial</span>
+  </div>
 </footer>
+
 
 <!-- ─── MODAL ────────────────────────────────────────── -->
 <div class="modal-overlay" id="modal" onclick="if(event.target.id==='modal')closeModal()">
