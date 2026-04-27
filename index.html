@@ -145,20 +145,9 @@ nav.scrolled{
 .split-top,.split-bot{
   position:absolute;top:0;left:0;width:100%;
   transition:transform 0.8s cubic-bezier(0.76,0,0.24,1);
-  will-change:transform;
-  backface-visibility:hidden;
-  -webkit-backface-visibility:hidden;
-  transform:translate3d(0,0,0);
 }
-/* Slight overlap prevents Chrome from drawing a 1px seam where the split halves meet. */
-.split-top{
-  clip-path:inset(0 0 49.25% 0);
-  -webkit-clip-path:inset(0 0 49.25% 0);
-}
-.split-bot{
-  clip-path:inset(49.25% 0 0 0);
-  -webkit-clip-path:inset(49.25% 0 0 0);
-}
+.split-top{clip-path:inset(0 0 50% 0);}
+.split-bot{clip-path:inset(50% 0 0 0);}
 .split-reveal{
   position:absolute;top:50%;left:50%;right:auto;
   width:max-content;max-width:84vw;
@@ -170,8 +159,8 @@ nav.scrolled{
   pointer-events:none;white-space:nowrap;text-shadow:none;
   -webkit-font-smoothing:antialiased;
 }
-.hero-wordmark.split-open .split-top{transform:translate3d(0,-0.38em,0);}
-.hero-wordmark.split-open .split-bot{transform:translate3d(0,0.38em,0);}
+.hero-wordmark.split-open .split-top{transform:translateY(-0.38em);}
+.hero-wordmark.split-open .split-bot{transform:translateY(0.38em);}
 .hero-wordmark.split-open .split-reveal{opacity:1;transition:opacity 0.5s ease 0.38s;}
 .hero-body{
   font-size:17px;line-height:1.75;color:var(--text-mid);font-weight:400;
@@ -413,8 +402,8 @@ footer::after{
 @media(max-width:430px){
   .hero-lockup{padding:26px 22px 22px;}
   .split-reveal{font-size:clamp(7px,2.15vw,9px);letter-spacing:0.06em;max-width:82vw;}
-  .hero-wordmark.split-open .split-top{transform:translate3d(0,-0.42em,0);}
-  .hero-wordmark.split-open .split-bot{transform:translate3d(0,0.42em,0);}
+  .hero-wordmark.split-open .split-top{transform:translateY(-0.42em);}
+  .hero-wordmark.split-open .split-bot{transform:translateY(0.42em);}
 }
 @media(max-width:380px){
   .split-reveal{font-size:clamp(7px,2.15vw,8.5px);letter-spacing:0.055em;max-width:84vw;}
