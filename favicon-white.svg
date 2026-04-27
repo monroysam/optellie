@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Optellie logo">
+  <g transform="translate(95.55 32.22) scale(0.53845)">
+    <polygon points="87.08 689.15 87.74 413.45 297.88 539.2 297.21 814.9 87.08 689.15" fill="#F1ECE3" stroke="#C9A770" stroke-opacity="0.35" stroke-width="6" stroke-linejoin="round"/>
+    <polygon points="298.08 288.73 297.64 17.14 508.44 141.86 508.88 413.45 298.08 288.73" fill="#F1ECE3" stroke="#C9A770" stroke-opacity="0.35" stroke-width="6" stroke-linejoin="round"/>
+    <polygon points="297.64 287.11 508.2 413.45 297.64 539.79 87.08 413.45 297.64 287.11" fill="#F1ECE3" stroke="#C9A770" stroke-opacity="0.35" stroke-width="6" stroke-linejoin="round"/>
+    <polygon points="297.88 16.31 508.45 142.65 297.88 268.99 87.32 142.65 297.88 16.31" fill="#F1ECE3" stroke="#C9A770" stroke-opacity="0.35" stroke-width="6" stroke-linejoin="round"/>
+  </g>
+</svg>
