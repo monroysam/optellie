@@ -56,6 +56,20 @@ nav.scrolled{
   opacity:0;
   animation:navSlideLeft 0.9s cubic-bezier(0.22,1,0.36,1) 0.4s forwards;
 }
+.nav-logo-mark{
+  width:18px;
+  height:25px;
+  display:block;
+  flex:0 0 auto;
+  color:var(--text);
+  opacity:0.96;
+}
+.nav-logo-mark polygon{
+  fill:currentColor;
+  stroke:rgba(201,167,112,0.28);
+  stroke-width:7;
+  stroke-linejoin:round;
+}
 .nav-logo-name{
   font-family:var(--sans);font-weight:500;font-size:13px;
   letter-spacing:0.22em;text-transform:uppercase;color:var(--text);
@@ -296,6 +310,8 @@ footer{
 /* ─── RESPONSIVE ──────────────────────────────────────── */
 @media(max-width:768px){
   nav{padding:18px 24px;}
+  .nav-logo{gap:9px;}
+  .nav-logo-mark{width:16px;height:23px;}
   .hero{padding:0 24px;}
   .hero-lockup{padding:28px 32px 24px;}
   .hero-lockup::before,.hero-lockup::after,
@@ -388,7 +404,13 @@ footer{
 
 <!-- ─── NAV ──────────────────────────────────────────── -->
 <nav id="nav">
-  <a class="nav-logo" href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;">
+  <a class="nav-logo" href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;" aria-label="Optellie home">
+    <svg class="nav-logo-mark" viewBox="80 10 440 810" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+      <polygon points="87.08 689.15 87.74 413.45 297.88 539.2 297.21 814.9 87.08 689.15"/>
+      <polygon points="298.08 288.73 297.64 17.14 508.44 141.86 508.88 413.45 298.08 288.73"/>
+      <polygon points="297.64 287.11 508.2 413.45 297.64 539.79 87.08 413.45 297.64 287.11"/>
+      <polygon points="297.88 16.31 508.45 142.65 297.88 268.99 87.32 142.65 297.88 16.31"/>
+    </svg>
     <span class="nav-logo-name">Optellie</span>
   </a>
   <button class="nav-cta" onclick="openModal()">Get in touch</button>
