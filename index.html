@@ -13,7 +13,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
-html{scroll-behavior:smooth;}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;text-size-adjust:100%;}
 :root{
   --bg:#0F1210;
   --bg-soft:#0B0D0C;
@@ -141,6 +141,7 @@ nav.scrolled{
   text-shadow:0 0 54px rgba(201,167,112,0.055);
 }
 .split-spacer{visibility:hidden;pointer-events:none;display:block;}
+.hero-split-wrap{position:relative;display:inline-block;}
 .split-top,.split-bot{
   position:absolute;top:0;left:0;width:100%;
   transition:transform 0.8s cubic-bezier(0.76,0,0.24,1);
@@ -148,13 +149,15 @@ nav.scrolled{
 .split-top{clip-path:inset(0 0 50% 0);}
 .split-bot{clip-path:inset(50% 0 0 0);}
 .split-reveal{
-  position:absolute;top:50%;left:0;right:0;
-  transform:translateY(-50%);
+  position:absolute;top:50%;left:50%;right:auto;
+  width:max-content;max-width:84vw;
+  transform:translate(-50%,-50%);
   font-family:var(--sans);font-weight:400;
-  font-size:clamp(11px,1.4vw,19px);letter-spacing:0.15em;
+  font-size:clamp(10px,1.25vw,17px);letter-spacing:clamp(0.08em,0.45vw,0.14em);
   text-transform:uppercase;color:var(--gold);
   text-align:center;opacity:0;transition:opacity 0.5s ease;
   pointer-events:none;white-space:nowrap;text-shadow:none;
+  -webkit-font-smoothing:antialiased;
 }
 .hero-wordmark.split-open .split-top{transform:translateY(-0.38em);}
 .hero-wordmark.split-open .split-bot{transform:translateY(0.38em);}
@@ -383,7 +386,7 @@ footer::after{
   .hero-lockup{padding:28px 32px 24px;}
   .hero-lockup::before,.hero-lockup::after,
   .hero-lockup .corner-bl,.hero-lockup .corner-br{width:16px;height:16px;}
-  .split-reveal{font-size:clamp(7px,2.6vw,10px);letter-spacing:0.12em;}
+  .split-reveal{font-size:clamp(8px,2.2vw,10px);letter-spacing:0.07em;max-width:82vw;}
   .hero-body{font-size:15px;max-width:100%;margin-bottom:32px;}
   .cta-primary{padding:14px 28px;font-size:11px;}
   .scroll-cue{bottom:24px;}
@@ -395,8 +398,15 @@ footer::after{
   .footer-meta{justify-content:center;text-align:center;gap:10px;padding-top:16px;}
   .modal{padding:28px 20px;width:calc(100% - 24px);max-width:none;}
 }
+
+@media(max-width:430px){
+  .hero-lockup{padding:26px 22px 22px;}
+  .split-reveal{font-size:clamp(7px,2.15vw,9px);letter-spacing:0.06em;max-width:82vw;}
+  .hero-wordmark.split-open .split-top{transform:translateY(-0.42em);}
+  .hero-wordmark.split-open .split-bot{transform:translateY(0.42em);}
+}
 @media(max-width:380px){
-  .split-reveal{font-size:clamp(6px,2.5vw,9px);letter-spacing:0.09em;}
+  .split-reveal{font-size:clamp(7px,2.15vw,8.5px);letter-spacing:0.055em;max-width:84vw;}
 }
 @media(prefers-reduced-motion:reduce){
   .nav-logo,.nav-cta{opacity:1;animation:none;transform:none;}
@@ -502,7 +512,7 @@ footer::after{
       <div class="hero-lockup" style="position:relative;">
         <div class="corner-bl"></div>
         <div class="corner-br"></div>
-        <div style="position:relative;">
+        <div class="hero-split-wrap">
           <span class="split-spacer hero-wordmark-text">Optellie</span>
           <span class="split-top hero-wordmark-text" aria-hidden="true">Optellie</span>
           <span class="split-bot hero-wordmark-text" aria-hidden="true">Optellie</span>
